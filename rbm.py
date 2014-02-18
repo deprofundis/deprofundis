@@ -2,12 +2,12 @@ from copy import copy
 from ipdb import set_trace as pause
 from math import ceil, sqrt
 from matplotlib import pyplot as plt
-import matplotlib.gridspec as gridspec
 import numpy as np
 import random
 import time
 
 from base import create_mnist_patternsets, Minibatch, Network, Patternset
+from plotting import plot_rbm_2layer, plot_biases, plot_errors, plot_weights
 from utils.utils import imagesc, isfunction, sigmoid, sumsq, vec_to_arr
 from utils.stopwatch import Stopwatch
 
@@ -202,7 +202,6 @@ class RbmNetwork(Network):
         energy = -E_w - E_vbias - E_hbias
         return energy.mean(axis=1)
 
-
     def plot_layers(self, v_plus, ttl=None):
         if not self.plot: return
         v_bias = self.a.reshape(self.v_shape)
@@ -210,7 +209,6 @@ class RbmNetwork(Network):
         h_plus_inp, h_plus_prob, h_plus_state, \
             v_minus_inp, v_minus_prob, v_minus_state, \
             h_minus_inp, h_minus_prob, h_minus_state = self.k_gibbs_steps(v_plus)
-        lmin, lmax = None, None
 
         v_plus = v_plus.reshape(self.v_shape)
         h_plus_inp = vec_to_arr(h_plus_inp)*1.
@@ -223,25 +221,11 @@ class RbmNetwork(Network):
         h_minus_prob = vec_to_arr(h_minus_prob)*1.
         h_minus_state = vec_to_arr(h_minus_state)*1.
 
-        # fig = plt.figure(figsize=(6,9))
-        # fig = plt.gcf()
-        fig = plt.figure(self.fignum_layers)
-        plt.clf()
-        if ttl: fig.suptitle(ttl)
-        gs = gridspec.GridSpec(16,2)
-        # top left downwards
-        ax = fig.add_subplot(gs[    0,0]); im = imagesc(h_plus_state, dest=ax, vmin=lmin, vmax=lmax); ax.set_title('h_plus_state')
-        ax = fig.add_subplot(gs[    1,0]); im = imagesc(h_plus_prob, dest=ax, vmin=lmin, vmax=lmax); ax.set_title('h_plus_prob')
-        ax = fig.add_subplot(gs[    2,0]); im = imagesc(h_plus_inp, dest=ax, vmin=lmin, vmax=lmax); ax.set_title('h_plus_inp')
-        ax = fig.add_subplot(gs[ 5: 8,0]); im = imagesc(v_plus, dest=ax, vmin=lmin, vmax=lmax); ax.set_title('v_plus'); fig.colorbar(im) # , ticks=[lmin, lmax])
-        # top right downwards
-        ax = fig.add_subplot(gs[    0,1]); im = imagesc(h_minus_state, dest=ax, vmin=lmin, vmax=lmax); ax.set_title('h_minus_state')
-        ax = fig.add_subplot(gs[    1,1]); im = imagesc(h_minus_prob, dest=ax, vmin=lmin, vmax=lmax); ax.set_title('h_minus_prob')
-        ax = fig.add_subplot(gs[    2,1]); im = imagesc(h_minus_inp, dest=ax, vmin=lmin, vmax=lmax); ax.set_title('h_minus_inp')
-        ax = fig.add_subplot(gs[ 5: 8,1]); im = imagesc(v_minus_state*1, dest=ax, vmin=lmin, vmax=lmax); ax.set_title('v_minus_state'); fig.colorbar(im) # , ticks=[lmin, lmax])
-        ax = fig.add_subplot(gs[ 9:12,1]); im = imagesc(v_minus_prob*1, dest=ax, vmin=lmin, vmax=lmax); ax.set_title('v_minus_prob'); fig.colorbar(im) # , ticks=[lmin, lmax])
-        ax = fig.add_subplot(gs[13:16,1]); im = imagesc(v_minus_inp*1, dest=ax, vmin=lmin, vmax=lmax); ax.set_title('v_minus_inp'); fig.colorbar(im) # , ticks=[lmin, lmax])
-        plt.draw()
+        plot_rbm_2layer(v_plus,
+                        h_plus_inp, h_plus_prob, h_plus_state,
+                        v_minus_inp, v_minus_prob, v_minus_state,
+                        h_minus_inp, h_minus_prob, h_minus_state,
+                        fignum=self.fignum_layers, ttl=ttl)
 
     def plot_biases(self, v_bias, h_bias, fignum, ttl=None):
         if not self.plot: return

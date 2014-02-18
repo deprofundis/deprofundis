@@ -1,5 +1,6 @@
 from matplotlib import pyplot as plt
 import numpy as np
+from random import sample
 from types import FunctionType
 
 
@@ -8,6 +9,13 @@ class HashableDict(dict):
     def __hash__(self):
         return hash(tuple(sorted(self.items())))
 
+
+def grab_minibatch(patterns, n_in_minibatch):
+    assert len(patterns.shape) == 2
+    ix = np.arange(len(patterns))
+    np.random.shuffle(ix)
+    ix = ix[:n_in_minibatch]
+    return patterns[ix,:]
 
 def imagesc(data, dest=None, grayscale=True, vmin=None, vmax=None):
     plt.ion()

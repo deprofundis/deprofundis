@@ -16,14 +16,22 @@
 
 class DBN(Network):
 
-    def __init__(self, n_layers, n_units):
-        self.up_epochs = 100000
-        self.down_epochs = 100000
+    def __init__(self, lrate, momentum, wcost, layer_units, n_epochs=100000, k=1):
+        self.lrate = lrate
+        self.momentum = momentum
+        self.wcost = wcost
+        self.n_epochs = n_epochs
 
+        assert(isinstance(layer_units, list) and len(layer_units) > 2)
+        self.layer_units = layer_units
+
+        assert(k > 0)
+        self.k = k
+
+        # create rbms
+        self.n_layers = len(layer_units) - 1
         self.rbms = []
-        for l in n_layers:
-            n_v = n_units # number of input units?
-            n_h = n_units
+        for n_v, n_h in zip(layer_units[:-1], layer_units[1:]):
             rbm = RbmNetwork(n_v, n_h)
             self.rbms.append(rbm)
 
@@ -43,13 +51,9 @@ class DBN(Network):
             rbm.train(layer_input)
             layer_input = rbm.propagatefwd(layer_input)
             
-    def up_down_training(self, wholeds):
-        up_activations = propagate_fwd_all(wholeds) #propagate all the forward to get v+ for top rbm
-        v_minus_top = run_cdk_on_top_layers(v_plus)
-        for rbm in self.rbms[-2::-1]: # iterate backwards ignoring top RBM
-            # take up_activations for this rbm
-            # take sample from higher-level rbm
-            # calculate gradient and adjust weights
+    def up_pass(self, ):
+
+    def down_pass(self, ):
 
     def run_cdk_on_top_layers(self, v_plus):
         # get v_plus 

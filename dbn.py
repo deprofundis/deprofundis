@@ -37,13 +37,14 @@ class DBN(Network):
 
         # create rbms
         self.n_layers = len(layer_units)
+        self.n_rbms = self.n_layers-1
         self.rbms = []
         for n_v, n_h in zip(layer_units[:-1], layer_units[1:]):
             rbm = RbmNetwork(n_v, n_h, n_sampling_steps=k)
             self.rbms.append(rbm)
         if self.v_shape_bottom: self.rbms[0].v_shape = self.v_shape_bottom
 
-    def test_trial(self):
+    def test_trial(self, v_input):
         # go all the way up
         # go all the way down
         # calculate reconstruction error
@@ -62,7 +63,7 @@ class DBN(Network):
         nRBMs = len(self.rbms)
         for counter, rbm in enumerate(self.rbms):
             print 'Training greedy %i x %i net (%i of %i RBMs)' % \
-                (rbm.n_v, rbm.n_h, counter, nRBMs)
+                (rbm.n_v, rbm.n_h, counter, self.n_rbms)
             rbm.train(layer_input,
                       n_train_epochs=n_train_epochs,
                       should_print=should_print,

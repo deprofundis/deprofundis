@@ -72,10 +72,11 @@ class DBN(Network):
         if valid_patterns is not None:
             rand_ix = choice(range(len(valid_patterns)))
             self.plot_layers(valid_patterns[rand_ix, :], ttl='Greedy after %i epochs' % n_train_epochs)
-            pause()
 
-    def train_backfitting(self, train_patterns, n_train_epochs, valid_patterns=None, should_print=None, should_plot=None):
+    def train_backfitting(self, train_patterns, n_train_epochs, \
+                    valid_patterns=None, should_print=None, should_plot=None):
         for epochnum in range(n_train_epochs):
+
             if should_print and should_print(epochnum):
                 print 'Training backfitting (%i of %i epochs)' % (epochnum, n_train_epochs)
             if should_plot and should_plot(epochnum) and valid_patterns is not None:
@@ -83,7 +84,7 @@ class DBN(Network):
                 self.plot_layers(valid_patterns[rand_ix, :], ttl='Backfitting after %i epochs' % epochnum)
             vis_states = grab_minibatch(train_patterns, self.n_in_minibatch)        
              # obtain intial values from bottom rbm
-            _, _, _, vis_states, vis_probs, _, _, _, _ = self.rbms[0].k_gibbs_steps(vis_states, k=1)
+            _, _, _, _, vis_probs, vis_states, _, _, _ = self.rbms[0].k_gibbs_steps(vis_states, k=1)
             # start backfitting
             _, top_state = self.up_pass(vis_probs, vis_states)
             v_k_probs, v_k_state = self.run_cdk_on_top_layers(top_state)
@@ -111,9 +112,11 @@ class DBN(Network):
             delta_bias_vis = (self.lrate / batch_size * delta_bias_vis).mean(axis=0)
             delta_bias_hid = (self.lrate / batch_size * delta_bias_hid).mean(axis=0)
 
-            rbm.w = rbm.w + delta_w
-            rbm.a = rbm.a + delta_bias_vis
-            rbm.b = rbm.b + delta_bias_hid
+            print "Up ", delta_w
+
+            #rbm.w = rbm.w + delta_w
+            #rbm.a = rbm.a + delta_bias_vis
+            #rbm.b = rbm.b + delta_bias_hid
 
             # feed activations into higher-level RBM
             h_0_probs = h_1_probs
@@ -142,9 +145,11 @@ class DBN(Network):
             delta_bias_vis = (self.lrate / batch_size * delta_bias_vis).mean(axis=0)
             delta_bias_hid = (self.lrate / batch_size * delta_bias_hid).mean(axis=0)
 
-            rbm.w = rbm.w + delta_w
-            rbm.a = rbm.a + delta_bias_vis
-            rbm.b = rbm.b + delta_bias_hid
+            print "Down ", delta_w
+            
+            #rbm.w = rbm.w + delta_w
+            #rbm.a = rbm.a + delta_bias_vis
+            #rbm.b = rbm.b + delta_bias_hid
 
             h_1_probs = h_0_probs
             h_1_state = h_0_state
@@ -188,7 +193,7 @@ if __name__ == "__main__":
     nhidden = 200
     n_trainpatterns = 500
     n_validpatterns = 1000
-    n_train_greedy_epochs = 0
+    n_train_greedy_epochs = 300
     n_train_backfitting_epochs = 10000
     n_in_minibatch = 5
     momentum = 0.9

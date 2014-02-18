@@ -57,13 +57,6 @@ class RbmNetwork(Network):
         self.fignum_errors = 4
         self.fignum_biases = 5
         self.fignum_dbiases = 6
-        if self.plot:
-            plt.figure(figsize=(5,7), num=self.fignum_layers)
-            if self.fignum_dweights: plt.figure(figsize=(9,6), num=self.fignum_weights) # 6,4
-            if self.fignum_dweights: plt.figure(figsize=(9,6), num=self.fignum_dweights)
-            plt.figure(figsize=(4,3), num=self.fignum_errors)
-            if self.fignum_biases: plt.figure(figsize=(3,2), num=self.fignum_biases)
-            if self.fignum_dbiases: plt.figure(figsize=(3,2), num=self.fignum_dbiases)
 
     def init_weights(self, n_v, n_h, scale=0.01):
         # return np.random.uniform(size=(n_v, n_h), high=scale)
@@ -154,8 +147,8 @@ class RbmNetwork(Network):
     def calculate_error(self, actual, desired):
         return sumsq(actual - desired)
 
-    def k_gibbs_steps(self, v_plus, w=None, a=None, b=None):        
-        k = self.n_sampling_steps(self)
+    def k_gibbs_steps(self, v_plus, w=None, a=None, b=None, k=None):
+        if k is None: k = self.n_sampling_steps(self)
         assert(k>0) # do at least one step
 
         for t in range(k):

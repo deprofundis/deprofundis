@@ -1,3 +1,4 @@
+from ipdb import set_trace as pause
 from math import ceil, sqrt
 from matplotlib import pyplot as plt
 import matplotlib.gridspec as gridspec
@@ -5,7 +6,13 @@ import matplotlib.gridspec as gridspec
 from utils.utils import imagesc
 
 
+def setup_plot():
+    plt.ion()
+    plt.show()
+
 def plot_biases(v_bias, h_bias, fignum=None, ttl=None):
+    setup_plot()
+    fig = plt.figure(figsize=(3,2), num=fignum)
     vmin = None # min(map(min, [v_bias, h_bias]))
     vmax = None # max(map(max, [v_bias, h_bias]))
     fig = plt.figure(fignum)
@@ -16,9 +23,9 @@ def plot_biases(v_bias, h_bias, fignum=None, ttl=None):
     ax = fig.add_subplot(gs[0,1]); im = imagesc(h_bias, dest=ax, vmin=vmin, vmax=vmax); ax.set_title('h bias'); fig.colorbar(im)
     plt.draw()
 
-
 def plot_errors(train_errors, valid_errors=None, test_errors=None, fignum=None):
-    plt.figure(figsize=(9,6), num=fignum)
+    setup_plot()
+    fig = plt.figure(figsize=(4,3), num=fignum)
     plt.clf()
     epochrange = range(len(train_errors))
     if valid_errors is not None: assert len(train_errors) == len(valid_errors)
@@ -33,14 +40,14 @@ def plot_errors(train_errors, valid_errors=None, test_errors=None, fignum=None):
     plt.ylim(ymin=0, ymax=max_error*1.1)
     plt.draw()
 
-
 def plot_rbm_2layer(v_plus,
                     h_plus_inp, h_plus_prob, h_plus_state,
                     v_minus_inp, v_minus_prob, v_minus_state,
                     h_minus_inp, h_minus_prob, h_minus_state,
                     fignum=None, ttl=None):
+    setup_plot()
     lmin, lmax = None, None
-    fig = plt.figure(fignum)
+    fig = plt.figure(figsize=(5,7), num=fignum)
     plt.clf()
     if ttl: fig.suptitle(ttl)
     gs = gridspec.GridSpec(16,2)
@@ -59,6 +66,8 @@ def plot_rbm_2layer(v_plus,
     plt.draw()
 
 def plot_weights(w, v_shape, fignum=None, ttl=None):
+    setup_plot()
+    fig = plt.figure(figsize=(9,6), num=fignum)
     n_h = w.shape[1]
     vmin, vmax = min(w.ravel()), max(w.ravel())
     fig = plt.figure(fignum)

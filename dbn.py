@@ -1,5 +1,5 @@
 from utils import grab_minibatch
-
+from base import Network
 # TODO
 #
 # DBN with L layers
@@ -55,9 +55,9 @@ class DBN(Network):
         for _ in range(n_epochs):
             vis_states = grab_minibatch(patterns, self.n_in_minibatch)        
              # obtain intial values from bottom rbm
-            vis_act = self.rbms[0].we_dont_know_what_comes_here(vis_states)
+            vis_states, vis_act = self.rbms[0].k_gibbs_steps(vis_states, k=1)
             # start backfitting
-            _, top_state = up_pass(vis_states, vis_act)
+            _, top_state = up_pass(vis_act, vis_states)
             _, v_k_state = run_cdk_on_top_layer(top_state)
             down_pass(v_k_state)
                     

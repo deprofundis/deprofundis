@@ -17,17 +17,19 @@ def plot_biases(v_bias, h_bias, fignum=None, ttl=None):
     plt.draw()
 
 
-def plot_errors(train_errors, valid_errors, test_errors, fignum=None):
+def plot_errors(train_errors, valid_errors=None, test_errors=None, fignum=None):
     plt.figure(figsize=(9,6), num=fignum)
     plt.clf()
     epochrange = range(len(train_errors))
-    assert len(train_errors) == len(valid_errors)
-    assert len(train_errors) == len(test_errors)
+    if valid_errors is not None: assert len(train_errors) == len(valid_errors)
+    if test_errors is not None: assert len(train_errors) == len(test_errors)
     train_line = plt.plot(train_errors, label='Train')
     valid_line = plt.plot(valid_errors, label='Valid')
     test_line = plt.plot(test_errors, label='Test')
     plt.legend()
-    max_error = max(max(train_errors), max(test_errors), max(valid_errors))
+    max_error = max(max(train_errors),
+                    max(valid_errors) if valid_errors else 0,
+                    max(test_errors) if test_errors else 0)
     plt.ylim(ymin=0, ymax=max_error*1.1)
     plt.draw()
 

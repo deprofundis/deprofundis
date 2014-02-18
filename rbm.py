@@ -220,27 +220,27 @@ class RbmNetwork(Network):
         h_minus_prob = vec_to_arr(h_minus_prob)*1.
         h_minus_state = vec_to_arr(h_minus_state)*1.
 
-        plot_rbm_2layer(v_plus,
-                        h_plus_inp, h_plus_prob, h_plus_state,
-                        v_minus_inp, v_minus_prob, v_minus_state,
-                        h_minus_inp, h_minus_prob, h_minus_state,
-                        fignum=self.fignum_layers, ttl=ttl)
+        return plot_rbm_2layer(v_plus,
+                               h_plus_inp, h_plus_prob, h_plus_state,
+                               v_minus_inp, v_minus_prob, v_minus_state,
+                               h_minus_inp, h_minus_prob, h_minus_state,
+                               fignum=self.fignum_layers, ttl=ttl)
 
     def plot_biases(self, v_bias, h_bias, fignum, ttl=None):
         if not self.plot: return
         v_bias = v_bias.reshape(self.v_shape)
         h_bias = vec_to_arr(h_bias)
-        plot_biases(v_bias, h_bias, fignum, ttl=ttl)
+        return plot_biases(v_bias, h_bias, fignum, ttl=ttl)
 
     def plot_weights(self, w, fignum, ttl=None):
         if not self.plot: return
-        plot_weights(w, v_shape=self.v_shape, fignum=fignum, ttl=ttl)
+        return plot_weights(w, v_shape=self.v_shape, fignum=fignum, ttl=ttl)
     
     def plot_errors(self, train_errors, valid_errors, test_errors):
         if not self.plot: return
-        plot_errors(train_errors, valid_errors, test_errors,
-                    fignum=self.fignum_errors)
-
+        return plot_errors(train_errors, valid_errors, test_errors,
+                           fignum=self.fignum_errors)
+    
     def save_error_plots(self, train_errors, valid_errors, test_errors, filename='errors.png'):
         self.plot_errors(train_errors, valid_errors, test_errors)
         plt.figure(self.fignum_errors).savefig(filename)

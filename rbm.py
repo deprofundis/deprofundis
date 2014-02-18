@@ -7,7 +7,8 @@ import random
 import time
 
 from base import create_mnist_patternsets, Minibatch, Network, Patternset
-from plotting import plot_rbm_2layer, plot_biases, plot_errors, plot_weights
+# from plotting import plot_rbm_2layer, plot_biases, plot_errors, plot_weights
+from plotting import plot_rbm_2layer, plot_errors
 from utils.utils import imagesc, isfunction, sigmoid, sumsq, vec_to_arr
 from utils.stopwatch import Stopwatch
 
@@ -259,18 +260,8 @@ class RbmNetwork(Network):
     
     def plot_errors(self, train_errors, valid_errors, test_errors):
         if not self.plot: return
-        plt.figure(figsize=(9,6), num=self.fignum_errors)
-        plt.clf()
-        epochrange = range(len(train_errors))
-        assert len(train_errors) == len(valid_errors)
-        assert len(train_errors) == len(test_errors)
-        train_line = plt.plot(train_errors, label='Train')
-        valid_line = plt.plot(valid_errors, label='Valid')
-        test_line = plt.plot(test_errors, label='Test')
-        plt.legend()
-        max_error = max(max(train_errors), max(test_errors), max(valid_errors))
-        plt.ylim(ymin=0, ymax=max_error*1.1)
-        plt.draw()
+        plot_errors(train_errors, valid_errors, test_errors,
+                    fignum=self.fignum_errors)
 
     def save_error_plots(self, train_errors, valid_errors, test_errors, filename='errors.png'):
         self.plot_errors(train_errors, valid_errors, test_errors)

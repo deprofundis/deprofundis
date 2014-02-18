@@ -4,6 +4,21 @@ import matplotlib.gridspec as gridspec
 from utils.utils import imagesc
 
 
+def plot_errors(train_errors, valid_errors, test_errors, fignum=None):
+    plt.figure(figsize=(9,6), num=fignum)
+    plt.clf()
+    epochrange = range(len(train_errors))
+    assert len(train_errors) == len(valid_errors)
+    assert len(train_errors) == len(test_errors)
+    train_line = plt.plot(train_errors, label='Train')
+    valid_line = plt.plot(valid_errors, label='Valid')
+    test_line = plt.plot(test_errors, label='Test')
+    plt.legend()
+    max_error = max(max(train_errors), max(test_errors), max(valid_errors))
+    plt.ylim(ymin=0, ymax=max_error*1.1)
+    plt.draw()
+
+
 def plot_rbm_2layer(v_plus,
                     h_plus_inp, h_plus_prob, h_plus_state,
                     v_minus_inp, v_minus_prob, v_minus_state,
@@ -27,3 +42,5 @@ def plot_rbm_2layer(v_plus,
     ax = fig.add_subplot(gs[ 9:12,1]); im = imagesc(v_minus_prob*1, dest=ax, vmin=lmin, vmax=lmax); ax.set_title('v_minus_prob'); fig.colorbar(im) # , ticks=[lmin, lmax])
     ax = fig.add_subplot(gs[13:16,1]); im = imagesc(v_minus_inp*1, dest=ax, vmin=lmin, vmax=lmax); ax.set_title('v_minus_inp'); fig.colorbar(im) # , ticks=[lmin, lmax])
     plt.draw()
+
+

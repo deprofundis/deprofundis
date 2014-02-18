@@ -1,13 +1,15 @@
 from ipdb import set_trace as pause
+from matplotlib import pyplot as plt
 import numpy as np
 from random import shuffle
 
 from base import create_mnist_patternsets, Minibatch2, Network, Patternset
+from plotting import plot_errors
 from utils.utils import deriv_sigmoid, deriv_tanh, imagesc, sigmoid, sumsq, tanh, vec_to_arr
 
 
 class BackpropNetwork(Network):
-    def __init__(self, layersizes, lrate=0.01, momentum=0.9):
+    def __init__(self, layersizes, lrate=0.01, momentum=0.9, plot=True):
         assert len(layersizes) >= 3 # incl inpout & output
         self.layersizes = layersizes
         self.w, self.d_w = self.init_weights(scale=1), self.init_weights(0)
@@ -15,6 +17,16 @@ class BackpropNetwork(Network):
         self.n_l = len(self.layersizes)
         self.momentum = momentum
         self.lrate = lrate
+
+        self.plot = plot
+        self.fignum_errors = 1
+        self.fignum_layers = 2
+        self.fignum_weights_01 = 3
+        self.fignum_dweights_01 = 4
+        self.fignum_weights_12 = 5
+        self.fignum_dweights_12 = 6
+        self.fignum_biases = 7
+        self.fignum_dbiases = 8
 
     def init_weights(self, scale=0.01):
         return [np.random.normal(size=(n1,n2), scale=scale) if scale else np.zeros((n1,n2))
@@ -85,6 +97,10 @@ class BackpropNetwork(Network):
     
     def err_fn(self, actual, desired): return np.pow(actual - desired, 2)
 
+    def plot_errors(self, train_errors):
+        if not self.plot: return
+        return plot_errors(train_errors, fignum=self.fignum_errors)
+
 
 def arr_str(arr): return np.array_str(arr, precision=2)
 
@@ -137,11 +153,14 @@ if __name__ == "__main__":
     nEpochs = 20000 # 100000
     n_in_minibatch = min(len(train_iset), 20)
     report_every = 100 # 1000
+    train_errors = []
     for e in range(nEpochs):
         act0, target = Minibatch2(train_iset, train_oset, n_in_minibatch).patterns
         # act0, target = act0.ravel(), target.ravel()
         net.learn_trial(act0, target)
         if not e % report_every:
             error, mean_error = test_epoch(net, train_iset.patterns, train_oset.patterns, False)
-        if mean_error < 0.01: break
-    errors, mean_error = test_epoch(net, train_iset.patterns, train_oset.patterns, True)
+            train_errors.append(mean_error)
+            net.plot_errors(train_errors)
+            if mean_error < 0.01: break
+    final_error, final_mean_error = test_epoch(net, train_iset.patterns, train_oset.patterns, True)

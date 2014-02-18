@@ -169,7 +169,6 @@ class RbmNetwork(Network):
         return x > np.random.uniform(size=x.shape)
 
     def update_weights(self, v_plus):
-        n_in_minibatch = float(v_plus.shape[0])
         h_plus_inp, h_plus_prob, h_plus_state, \
             v_minus_inp, v_minus_prob, v_minus_state, \
             h_minus_inp, h_minus_prob, h_minus_state = self.k_gibbs_steps(v_plus)

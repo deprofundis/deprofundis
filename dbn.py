@@ -37,12 +37,13 @@ class DBN(Network):
 
         # create rbms
         self.n_layers = len(layer_units)
+        self.n_rbms = self.n_layers-1
         self.rbms = []
         for n_v, n_h in zip(layer_units[:-1], layer_units[1:]):
             rbm = RbmNetwork(n_v, n_h, n_sampling_steps=k)
             self.rbms.append(rbm)
 
-    def test_trial(self):
+    def test_trial(self, v_input):
         # go all the way up
         # go all the way down
         # calculate reconstruction error
@@ -58,10 +59,9 @@ class DBN(Network):
             print 'Skipping greedy training'
             return
         layer_input = dataset
-        nRBMs = len(self.rbms)
         for counter, rbm in enumerate(self.rbms):
             print 'Training greedy %i x %i net (%i of %i RBMs)' % \
-                (rbm.n_v, rbm.n_h, counter, nRBMs)
+                (rbm.n_v, rbm.n_h, counter, self.n_rbms)
             rbm.train(layer_input,
                       n_train_epochs=n_train_epochs,
                       should_print=should_print,
@@ -74,7 +74,7 @@ class DBN(Network):
                 print 'Training backfitting (%i of %i epochs)' % (epochnum, self.n_epochs)
             if should_plot and should_plot(epochnum) and valid_patterns is not None:
                 rand_ix = sample(range(len(valid_patterns)), 1)
-                self.rbms[0].plot_layers(valid_patterns[rand_ix, :])
+                #self.rbms[0].plot_layers(valid_patterns[rand_ix, :])
             vis_states = grab_minibatch(train_patterns, self.n_in_minibatch)        
              # obtain intial values from bottom rbm
             _, _, _, vis_states, vis_probs, _, _, _, _ = self.rbms[0].k_gibbs_steps(vis_states, k=1)
@@ -197,7 +197,7 @@ if __name__ == "__main__":
     test_patterns = np.array(test_pset.patterns).reshape((n_testpatterns, -1))
 
     net.train_greedy(train_patterns,
-                     n_train_epochs=0,
+                     n_train_epochs=500,
                      should_print=lambda n: not n % 100,
                      should_plot=lambda n: not n % 100)
     net.train_backfitting(train_patterns,

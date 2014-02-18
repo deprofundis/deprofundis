@@ -9,7 +9,7 @@ from utils.utils import imagesc, isunique, vec_to_arr
 
 class Network(object):
     def __repr__(self):
-        return '%s (%ix%i)' % (self.__class__.__name__, self.n_v, self.n_h)
+        return '%s' % (self.__class__.__name__)
 
     def init_weights(self):
         self.w = np.random.uniform(size=(self.n_v, self.n_h))

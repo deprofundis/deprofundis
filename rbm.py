@@ -26,7 +26,7 @@ from utils.stopwatch import Stopwatch
 
 
 class RbmNetwork(Network):
-    def __init__(self, n_v, n_h, lrate, wcost, momentum, n_temperatures=1, n_sampling_steps=1, v_shape=None, plot=True):
+    def __init__(self, n_v, n_h, lrate=0.01, wcost=0.0002, momentum=0.9, n_temperatures=1, n_sampling_steps=1, v_shape=None, plot=True):
         self.n_v, self.n_h = n_v, n_h
         self.lrate = lrate
         self.w = self.init_weights(n_v, n_h)
@@ -55,8 +55,11 @@ class RbmNetwork(Network):
         self.fignum_weights = None # 2
         self.fignum_dweights = None # 3
         self.fignum_errors = 4
-        self.fignum_biases = 5
-        self.fignum_dbiases = 6
+        self.fignum_biases = None # 5
+        self.fignum_dbiases = None # 6
+
+    def __repr__(self):
+        return '%s (%ix%i)' % (self.__class__.__name__, self.n_v, self.n_h)
 
     def init_weights(self, n_v, n_h, scale=0.01):
         # return np.random.uniform(size=(n_v, n_h), high=scale)

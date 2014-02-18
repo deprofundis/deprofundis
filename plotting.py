@@ -4,6 +4,18 @@ import matplotlib.gridspec as gridspec
 from utils.utils import imagesc
 
 
+def plot_biases(v_bias, h_bias, fignum=None, ttl=None):
+    vmin = None # min(map(min, [v_bias, h_bias]))
+    vmax = None # max(map(max, [v_bias, h_bias]))
+    fig = plt.figure(fignum)
+    plt.clf()
+    if ttl: fig.suptitle(ttl + '. range=%.2f to %.2f' % (vmin or float('NaN'), vmax or float('NaN')))
+    gs = gridspec.GridSpec(1,2)
+    ax = fig.add_subplot(gs[0,0]); im = imagesc(v_bias, dest=ax, vmin=vmin, vmax=vmax); ax.set_title('v bias'); fig.colorbar(im)
+    ax = fig.add_subplot(gs[0,1]); im = imagesc(h_bias, dest=ax, vmin=vmin, vmax=vmax); ax.set_title('h bias'); fig.colorbar(im)
+    plt.draw()
+
+
 def plot_errors(train_errors, valid_errors, test_errors, fignum=None):
     plt.figure(figsize=(9,6), num=fignum)
     plt.clf()

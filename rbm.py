@@ -7,8 +7,8 @@ import random
 import time
 
 from base import create_mnist_patternsets, Minibatch, Network, Patternset
-# from plotting import plot_rbm_2layer, plot_biases, plot_errors, plot_weights
-from plotting import plot_rbm_2layer, plot_errors
+# from plotting import plot_weights
+from plotting import plot_biases, plot_rbm_2layer, plot_errors
 from utils.utils import imagesc, isfunction, sigmoid, sumsq, vec_to_arr
 from utils.stopwatch import Stopwatch
 
@@ -57,8 +57,8 @@ class RbmNetwork(Network):
         self.fignum_weights = None # 2
         self.fignum_dweights = None # 3
         self.fignum_errors = 4
-        self.fignum_biases = None # 5
-        self.fignum_dbiases = None # 6
+        self.fignum_biases = 5
+        self.fignum_dbiases = 6
         if self.plot:
             plt.figure(figsize=(5,7), num=self.fignum_layers)
             if self.fignum_dweights: plt.figure(figsize=(9,6), num=self.fignum_weights) # 6,4
@@ -230,17 +230,9 @@ class RbmNetwork(Network):
 
     def plot_biases(self, v_bias, h_bias, fignum, ttl=None):
         if not self.plot: return
-        vmin = None # min(map(min, [v_bias, h_bias]))
-        vmax = None # max(map(max, [v_bias, h_bias]))
         v_bias = v_bias.reshape(self.v_shape)
         h_bias = vec_to_arr(h_bias)
-        fig = plt.figure(fignum)
-        plt.clf()
-        if ttl: fig.suptitle(ttl + '. range=%.2f to %.2f' % (vmin or float('NaN'), vmax or float('NaN')))
-        gs = gridspec.GridSpec(1,2)
-        ax = fig.add_subplot(gs[0,0]); im = imagesc(v_bias.reshape(self.v_shape), dest=ax, vmin=vmin, vmax=vmax); ax.set_title('v bias'); fig.colorbar(im)
-        ax = fig.add_subplot(gs[0,1]); im = imagesc(h_bias, dest=ax, vmin=vmin, vmax=vmax); ax.set_title('h bias'); fig.colorbar(im)
-        plt.draw()
+        plot_biases(v_bias, h_bias, fignum, ttl=ttl)
 
     def plot_weights(self, w, fignum, ttl=None):
         if not self.plot: return

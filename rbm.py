@@ -147,8 +147,8 @@ class RbmNetwork(Network):
     def calculate_error(self, actual, desired):
         return sumsq(actual - desired)
 
-    def k_gibbs_steps(self, v_plus, w=None, a=None, b=None):        
-        k = self.n_sampling_steps(self)
+    def k_gibbs_steps(self, v_plus, w=None, a=None, b=None, k=None):
+        if k is None: k = self.n_sampling_steps(self)
         assert(k>0) # do at least one step
 
         for t in range(k):

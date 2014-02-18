@@ -1,0 +1,44 @@
+*.py[co]
+
+# Packages
+*.egg
+*.egg-info
+dist
+build
+eggs
+sdist
+develop-eggs
+.installed.cfg
+
+# logs
+pip-log.txt
+*.log
+
+# Unit test / coverage reports
+.coverage
+.tox
+
+#Translations
+*.mo
+
+#Mr Developer
+.mr.developer.cfg
+
+#misc
+obsolete/
+
+#emacs backup
+*#
+.#*
+*~
+
+venv
+.DS_Store
+
+# AWS keys
+.aws-config
+*.pem
+
+# database dumps
+*.dump
+*.db

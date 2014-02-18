@@ -1,3 +1,4 @@
+from math import ceil, sqrt
 from matplotlib import pyplot as plt
 import matplotlib.gridspec as gridspec
 
@@ -55,4 +56,19 @@ def plot_rbm_2layer(v_plus,
     ax = fig.add_subplot(gs[13:16,1]); im = imagesc(v_minus_inp*1, dest=ax, vmin=lmin, vmax=lmax); ax.set_title('v_minus_inp'); fig.colorbar(im) # , ticks=[lmin, lmax])
     plt.draw()
 
+def plot_weights(w, v_shape, fignum=None, ttl=None):
+    n_h = w.shape[1]
+    vmin, vmax = min(w.ravel()), max(w.ravel())
+    fig = plt.figure(fignum)
+    plt.clf()
+    if ttl: fig.suptitle(ttl + '. range=%.2f to %.2f' % (vmin, vmax))
+    nsubplots = int(ceil(sqrt(n_h)))
+    gs = gridspec.GridSpec(nsubplots, nsubplots)
+    for hnum in range(n_h):
+        x,y = divmod(hnum, nsubplots)
+        ax = fig.add_subplot(gs[x,y])
+        im = imagesc(w[:,hnum].reshape(v_shape), dest=ax, vmin=vmin, vmax=vmax)
+        # ax.set_title('to H#%i' % hnum)
+    fig.colorbar(im)
+    plt.draw()
 

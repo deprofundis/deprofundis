@@ -1,14 +1,12 @@
 from copy import copy
 from ipdb import set_trace as pause
-from math import ceil, sqrt
 from matplotlib import pyplot as plt
 import numpy as np
 import random
 import time
 
 from base import create_mnist_patternsets, Minibatch, Network, Patternset
-# from plotting import plot_weights
-from plotting import plot_biases, plot_rbm_2layer, plot_errors
+from plotting import plot_biases, plot_rbm_2layer, plot_errors, plot_weights
 from utils.utils import imagesc, isfunction, sigmoid, sumsq, vec_to_arr
 from utils.stopwatch import Stopwatch
 
@@ -54,8 +52,8 @@ class RbmNetwork(Network):
         self.trial_num = 0
         self.plot = plot
         self.fignum_layers = 1
-        self.fignum_weights = None # 2
-        self.fignum_dweights = None # 3
+        self.fignum_weights = 2
+        self.fignum_dweights = 3
         self.fignum_errors = 4
         self.fignum_biases = 5
         self.fignum_dbiases = 6
@@ -236,19 +234,7 @@ class RbmNetwork(Network):
 
     def plot_weights(self, w, fignum, ttl=None):
         if not self.plot: return
-        vmin, vmax = min(w.ravel()), max(w.ravel())
-        fig = plt.figure(fignum)
-        plt.clf()
-        if ttl: fig.suptitle(ttl + '. range=%.2f to %.2f' % (vmin, vmax))
-        nsubplots = int(ceil(sqrt(self.n_h)))
-        gs = gridspec.GridSpec(nsubplots, nsubplots)
-        for hnum in range(self.n_h):
-            x,y = divmod(hnum, nsubplots)
-            ax = fig.add_subplot(gs[x,y])
-            im = imagesc(w[:,hnum].reshape(self.v_shape), dest=ax, vmin=vmin, vmax=vmax)
-            # ax.set_title('to H#%i' % hnum)
-        fig.colorbar(im)
-        plt.draw()
+        plot_weights(w, v_shape=self.v_shape, fignum=fignum, ttl=ttl)
     
     def plot_errors(self, train_errors, valid_errors, test_errors):
         if not self.plot: return

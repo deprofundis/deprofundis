@@ -176,7 +176,7 @@ class DBN(Network):
                         None, v_minus_bottom.reshape(v_shape), v_minus_bottom.reshape(v_shape),
                         None, None, None,
                         fignum=bottom_rbm.fignum_layers,
-                        ttl=None)
+                        ttl=ttl)
 
 
 if __name__ == "__main__":
@@ -187,7 +187,7 @@ if __name__ == "__main__":
     nhidden = 200
     n_trainpatterns = 500
     n_validpatterns = 1000
-    n_train_greedy_epochs = 400
+    n_train_greedy_epochs = 0
     n_train_backfitting_epochs = 10000
     n_in_minibatch = 5
     momentum = 0.9
@@ -226,6 +226,7 @@ if __name__ == "__main__":
 
     net.train_greedy(train_patterns,
                      n_train_epochs=n_train_greedy_epochs,
+                     valid_patterns=valid_patterns,
                      should_print=lambda n: not n % 100,
                      should_plot=lambda n: not n % 100)
     net.train_backfitting(train_patterns,

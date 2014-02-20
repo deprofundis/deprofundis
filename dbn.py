@@ -18,7 +18,64 @@ import numpy as np
 #
 #
 # For simplicity: constant number of units per layer
+class DeepBeliefRBM(object):
+    def __init__(self, rbm, lrate, momentum, wcost):
 
+        # assert that it is an rbm
+        assert (isinstance(rbm, Network))
+
+        self.rbm = rbm
+        self.lrate = lrate
+        self.momentum = momentum
+        self.wcost = wcost
+
+        # recognition weights and biases
+
+        self.rec_weights = None
+        self.rec_bias_hidden = None
+        self.rec_bias_visible = None
+
+        # generative weights and biases (reverse order since it is propagate top down
+        self.gen_weights = None
+        self.gen_bias_hidden = None
+        self.gen_bias_visible = None
+
+    # pass all the training data in train patterns
+    def train_greedy(self, train_patterns, valid_patterns=None, test_patterns=None,
+              n_train_epochs=1000, n_in_minibatch=10,
+              should_print=None, should_plot=None):
+        # Make sure that there is enough training data
+        assert(len(train_patterns) >= n_in_minibatch)
+
+        # Train the RBM
+        self.rbm.train(train_patterns, valid_patterns, test_patterns,
+                                         n_train_epochs, n_in_minibatch, should_print, should_plot)
+
+        # Split trained weights and biases
+        # Dimension of rec_weights is (#visible x #hidden)
+        self.rec_weights = np.copy(self.rbm.w)
+        # Already transposing weights since they are used in the top-down pass
+        # Dimension of gen_weights is (#hidden x #visible)
+        self.gen_weights = np.copy(self.rbm.w.T)
+        self.rec_bias_hidden = self.gen_bias_hidden = np.copy(self.b)
+        self.rec_bias_visible = self.gen_bias_visible = np.copy(self.a)
+
+    def up_pass(self, batch):
+        # computes the fan in into hidden nodes, fan_in_hidden.shape = batch_size x num_hidden
+        fan_in_hidden = np.dot(batch, self.rec_weights) + np.kron(np.ones((len(batch),1), self.rec_bias_hidden.T))
+        # compute the activation of each hidden node, hidden_act.shape = batch_size x hidden_act
+        hidden_act = self.rbm.act_fn(fan_in_hidden)
+        # comupte the state of the hidden node, hidden_state.shape = batch_size x num_hidden
+        hidden_state = hidden_act > np.random.uniform(size=hidden_act.shape)
+        # compute reconstruction fan-in
+        fan_in_visible = np.dot(hidden_state, self.gen_weights) + np.kron(np.ones((len(batch),1), self.gen_bias_visible.T))
+        # compute visible activation
+        visible_act = self.rbm.act_fn(fan_in_visible)
+        # compute visible states
+        visible_state = visible_act > np.random.uniform(self=visible_act.shape)
+
+        # do update
+        delta_w = 
 class DBN(Network):
 
     def __init__(self, lrate, momentum, wcost, layer_units, n_in_minibatch=100, n_epochs=100000, k=1):
@@ -60,7 +117,7 @@ class DBN(Network):
 
          
     def train_backfiting(self, patterns):    
-
+        # split weights / biases into recognition and generative
         for _ in range(self.n_epochs):
             vis_states = grab_minibatch(patterns, self.n_in_minibatch)        
              # obtain intial values from bottom rbm
@@ -137,3 +194,11 @@ class DBN(Network):
         top_rbm = self.rbms[-1]
         v_k_act, v_k_state = top_rbm.k_gibbs_steps(self, v_plus) # v_minus after k-step CD
         return v_k_act, v_k_state
+
+class Belief_Layer(Object):
+
+    def __init__(self, rbm):
+
+        if not isinstance(rbm, RbmNetwork):
+            raise
+        self.generative_weights =

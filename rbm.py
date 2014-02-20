@@ -24,14 +24,15 @@ from utils.stopwatch import Stopwatch
 # validation crit
 # init vis bias with hinton practical tip
 
-
 class RbmNetwork(Network):
     def __init__(self, n_v, n_h, lrate, wcost, momentum, n_temperatures=1, n_sampling_steps=1, v_shape=None, plot=True):
         self.n_v, self.n_h = n_v, n_h
         self.lrate = lrate
         self.w = self.init_weights(n_v, n_h)
-        self.a = np.zeros(shape=(n_v,)) # bias to visible
-        self.b = np.zeros(shape=(n_h,)) # bias to hidden
+        # keep the dimension (shape) specification, otherwise using kronecker product won't work
+        self.a = np.zeros(shape=(n_v,1)) # bias to visible
+        # keep the dimension (shape) specification, otherwise using kronecker product won't work
+        self.b = np.zeros(shape=(n_h,1)) # bias to hidden
         self.d_w = np.zeros(shape=self.w.shape)
         self.d_a = np.zeros(shape=self.a.shape)
         self.d_b = np.zeros(shape=self.b.shape)
@@ -62,6 +63,7 @@ class RbmNetwork(Network):
         # return np.random.uniform(size=(n_v, n_h), high=scale)
         return np.random.normal(size=(n_v, n_h), loc=0, scale=scale)
 
+    # training on complete training set
     def train(self, train_patterns, valid_patterns=None, test_patterns=None,
               n_train_epochs=1000, n_in_minibatch=10,
               should_print=None, should_plot=None):

@@ -36,10 +36,18 @@ class DeepBeliefRBM(object):
         self.rec_bias_hidden = None
         self.rec_bias_visible = None
 
+        self.d_rec_weights = np.zeros(shape = self.rbm.w.shape)
+        self.d_rec_bias_hidden = np.zeros(shape = self.rbm.b.shape)
+        self.d_rec_bias_visible = np.zeros(shape = self.rbm.a.shape)
+
         # generative weights and biases (reverse order since it is propagate top down
         self.gen_weights = None
         self.gen_bias_hidden = None
         self.gen_bias_visible = None
+
+        self.d_gen_weights = np.zeros(shape = self.rbm.w.shape)
+        self.d_gen_bias_hidden = np.zeros(shape = self.rbm.b.shape)
+        self.d_gen_bias_visible = np.zeros(shape = self.rbm.a.shape)
 
     # pass all the training data in train patterns
     def train_greedy(self, train_patterns, valid_patterns=None, test_patterns=None,
@@ -72,11 +80,31 @@ class DeepBeliefRBM(object):
         fan_in_visible = np.dot(hidden_state, self.gen_weights) + np.kron(np.ones((len(batch),1), self.gen_bias_visible.T))
         # compute visible activation
         visible_act = self.rbm.act_fn(fan_in_visible)
-        # compute visible states
-        visible_state = visible_act > np.random.uniform(self=visible_act.shape)
 
-        # do update
-        delta_w = 
+        # calculate weight deltas, delta_w.shape = num_visble x num_hidden
+        delta_w = np.dot((batch - visible_act).T, hidden_state,)
+        delta_w = (self.lrate / len(batch)) * delta_w - self.gen_weights * self.wcost + self.momentum * self.d_gen_weights
+        # weight update and store old deltas
+        self.gen_weights += delta_w
+        self.d_gen_weights = delta_w
+
+        # caluclate bias delta, delta_bias_visible.shape = num_visible x 1
+        delta_bias_visible = (batch - visible_act).mean(axis=0).T
+        delta_bias_visible = self.lrate * delta_bias_visible - self.wcost * self.gen_bias_visible + \
+                            self.momentum * self.d_gen_bias_visible
+        self.gen_bias_visible += delta_bias_visible
+        self.d_gen_weights = np.copy(delta_bias_visible)
+
+        # delta_bias_hidden.shape = num_hidden x 1
+        delta_bias_hidden = (hidden_state - hidden_act).mean(acis=0).T
+        delta_bias_hidden = self.lrate * delta_bias_hidden - self.wcost * self.gen_bias_hidden + \
+                            self.momentum * self.d_gen_bias_hidden
+        self.gen_bias_hidden += delta_bias_hidden
+        self.d_gen_bias_hidden = np.copy(delta_bias_hidden)
+
+    def down_pass(self, batch):
+        fan
+
 class DBN(Network):
     def __init__(self, lrate, momentum, wcost, layer_units, n_in_minibatch=10, k=1, v_shape_bottom=None):
         self.lrate = lrate

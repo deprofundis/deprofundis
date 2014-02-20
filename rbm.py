@@ -25,7 +25,7 @@ from utils.stopwatch import Stopwatch
 # init vis bias with hinton practical tip
 
 class RbmNetwork(Network):
-    def __init__(self, n_v, n_h, lrate, wcost, momentum, n_temperatures=1, n_sampling_steps=1, v_shape=None, plot=True):
+    def __init__(self, n_v, n_h, lrate=0.01, wcost=0.0002, momentum=0.9, n_temperatures=1, n_sampling_steps=1, v_shape=None, plot=True):
         self.n_v, self.n_h = n_v, n_h
         self.lrate = lrate
         self.w = self.init_weights(n_v, n_h)
@@ -56,8 +56,11 @@ class RbmNetwork(Network):
         self.fignum_weights = None # 2
         self.fignum_dweights = None # 3
         self.fignum_errors = 4
-        self.fignum_biases = 5
-        self.fignum_dbiases = 6
+        self.fignum_biases = None # 5
+        self.fignum_dbiases = None # 6
+
+    def __repr__(self):
+        return '%s (%ix%i)' % (self.__class__.__name__, self.n_v, self.n_h)
 
     def init_weights(self, n_v, n_h, scale=0.01):
         # return np.random.uniform(size=(n_v, n_h), high=scale)
@@ -171,7 +174,6 @@ class RbmNetwork(Network):
         return x > np.random.uniform(size=x.shape)
 
     def update_weights(self, v_plus):
-        n_in_minibatch = float(v_plus.shape[0])
         h_plus_inp, h_plus_prob, h_plus_state, \
             v_minus_inp, v_minus_prob, v_minus_state, \
             h_minus_inp, h_minus_prob, h_minus_state = self.k_gibbs_steps(v_plus)

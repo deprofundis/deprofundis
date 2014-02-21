@@ -69,9 +69,9 @@ class DeepBeliefRBM(object):
         self.rec_bias_hidden = self.gen_bias_hidden = np.copy(self.b)
         self.rec_bias_visible = self.gen_bias_visible = np.copy(self.a)
 
-    def up_pass(self, batch):
+    def up_pass(self, batch, mean_field = True):
         # computes the fan in into hidden nodes, fan_in_hidden.shape = batch_size x num_hidden
-        fan_in_hidden = np.dot(batch, self.rec_weights) + np.kron(np.ones((len(batch),1), self.rec_bias_hidden.T))
+        fan_in_hidden = np.dot(batch, self.rec_weights) + np.kron(np.ones(batch.shape), self.rec_bias_hidden.T)
         # compute the activation of each hidden node, hidden_act.shape = batch_size x hidden_act
         hidden_act = self.rbm.act_fn(fan_in_hidden)
         # comupte the state of the hidden node, hidden_state.shape = batch_size x num_hidden
@@ -82,7 +82,7 @@ class DeepBeliefRBM(object):
         visible_act = self.rbm.act_fn(fan_in_visible)
 
         # calculate weight deltas, delta_w.shape = num_visble x num_hidden
-        delta_w = np.dot((batch - visible_act).T, hidden_state,)
+        delta_w = np.dot((batch - visible_act).T, hidden_state)
         delta_w = (self.lrate / len(batch)) * delta_w - self.gen_weights * self.wcost + self.momentum * self.d_gen_weights
         # weight update and store old deltas
         self.gen_weights += delta_w
@@ -102,8 +102,20 @@ class DeepBeliefRBM(object):
         self.gen_bias_hidden += delta_bias_hidden
         self.d_gen_bias_hidden = np.copy(delta_bias_hidden)
 
+        return hidden_act if mean_field else hidden_state
+
     def down_pass(self, batch):
-        fan
+        # computes the fan in into the visible node
+        fan_in_visible = np.dot(batch, self.gen_weights) + np.kron(np.ones(batch.shape), self.gen_bias_visible)
+        # compute the activation of the visible nodes
+        visible_act = self.rbm.act_fn(fan_in_visible)
+        # comute the states of the visible nodes
+        visible_state = visible_act > np.random.uniform(size=visible_act.shape)
+
+        # compute hidden fan in for reconstruction
+        fan_in_hidden = np.dot(visible_state, self.rec_weights) + np.kron(np.ones(batch.shape), self.rec_bias_hidden)
+        # compute hidden activation
+        hidden_act = self.rbm.act_fn(fan_in_hidden)
 
 class DBN(Network):
     def __init__(self, lrate, momentum, wcost, layer_units, n_in_minibatch=10, k=1, v_shape_bottom=None):

@@ -18,14 +18,18 @@ class Network(object):
 
     def propagate_fwd(self, act1, w12, b2):
         # W = (N_LOWER x N_UPPER), ACT2 = (NPATTERNS x N_UPPER), B2 = (N_UPPER,)
-        inp2 = np.dot(act1, w12) + b2
+        pause()
+	
+	inp2 = np.dot(act1,w12)
+	inp2 = np.add(inp2, b2.T)
         act2 = self.act_fn(inp2)
         return inp2, act2
 
     def propagate_back(self, act2, w12, b1):
         # W = (N_LOWER x N_UPPER), ACT2 = (NPATTERNS x N_UPPER), B1 = (N_LOWER,)
-        inp1 = np.dot(act2, w12.T) + b1
-        # return INP1 as (NPATTERNS x N_LOWER)
+        inp1 = np.dot(act2, w12.T)
+	inp1 = np.add(inp1, b1.T)
+	# return INP1 as (NPATTERNS x N_LOWER)
         act1 = self.act_fn(inp1)
         return inp1, act1
 

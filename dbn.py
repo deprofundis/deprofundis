@@ -1,3 +1,4 @@
+from ipdb import set_trace as pause
 from random import choice
 from utils.utils import grab_minibatch
 from rbm import *
@@ -55,11 +56,13 @@ class DeepBeliefRBM(object):
               should_print=None, should_plot=None):
         # Make sure that there is enough training data
         assert(len(train_patterns) >= n_in_minibatch)
-
+	
+	pause()
+	
         # Train the RBM
         self.rbm.train(train_patterns, valid_patterns, test_patterns,
                                          n_train_epochs, n_in_minibatch, should_print, should_plot)
-
+	
         # Split trained weights and biases
         # Dimension of rec_weights is (#visible x #hidden)
         self.rec_weights = np.copy(self.rbm.w)
@@ -70,7 +73,9 @@ class DeepBeliefRBM(object):
         self.gen_bias_visible = np.copy(self.a)
 
     def up_pass(self, batch, mean_field = True):
-        # computes the fan in into hidden nodes, fan_in_hidden.shape = batch_size x num_hidden
+	pause()
+
+	# computes the fan in into hidden nodes, fan_in_hidden.shape = batch_size x num_hidden
         fan_in_hidden = np.dot(batch, self.rec_weights)
         fan_in_hidden = np.apply_along_axis(lambda x : x + self.rec_bias_hidden.T, 0, fan_in_hidden)
         # compute the activation of each hidden node, hidden_act.shape = batch_size x hidden_act
@@ -107,6 +112,8 @@ class DeepBeliefRBM(object):
         return hidden_act if mean_field else hidden_state
 
     def down_pass(self, batch, mean_field = False):
+	pause()
+
         # computes the fan in into the visible node
         fan_in_visible = np.dot(batch, self.gen_weights)
         fan_in_visible = np.apply_along_axis(lambda x : x + self.gen_bias_visible.T, 0, fan_in_visible)
@@ -183,13 +190,15 @@ class DBN(Network):
         raise NotImplementedError()
 
     def train_greedy(self, train_patterns, n_train_epochs, valid_patterns=None, should_plot=None, should_print=None):
-        if not n_train_epochs:
+       	
+	pause()
+	if not n_train_epochs:
             print 'Skipping greedy training'
             return
         layer_input = train_patterns
         for counter, rbmLayer in enumerate(self.layers):
             print 'Training greedy %i x %i net (%i of %i RBMs)' % \
-                (rbmLayer.n_v, rbmLayer.n_h, counter, self.n_rbms)
+                (rbmLayer.rbm.n_v, rbmLayer.rbm.n_h, counter, len(self.layers))
 
             rbmLayer.train_greedy(layer_input,
                       n_train_epochs=n_train_epochs,

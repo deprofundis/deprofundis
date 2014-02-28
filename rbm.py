@@ -1,5 +1,4 @@
-from copy import copy
-from ipdb import set_trace as pause
+# from ipdb import set_trace as pause
 from matplotlib import pyplot as plt
 import numpy as np
 import random
@@ -336,6 +335,3 @@ if __name__ == "__main__":
     net.train(train_patterns, valid_patterns=valid_patterns, test_patterns=test_patterns,
               n_train_epochs=n_train_epochs, n_in_minibatch=n_in_minibatch,
               should_print=should_print, should_plot=should_plot)
-
-    pause()
-

@@ -1,3 +1,4 @@
+from ipdb import set_trace as pause
 from random import choice
 from utils.utils import grab_minibatch
 from rbm import *
@@ -55,11 +56,13 @@ class DeepBeliefRBM(object):
               should_print=None, should_plot=None):
         # Make sure that there is enough training data
         assert(len(train_patterns) >= n_in_minibatch)
-
+	
+	pause()
+	
         # Train the RBM
         self.rbm.train(train_patterns, valid_patterns, test_patterns,
                                          n_train_epochs, n_in_minibatch, should_print, should_plot)
-
+	
         # Split trained weights and biases
         # Dimension of rec_weights is (#visible x #hidden)
         self.rec_weights = np.copy(self.rbm.w)
@@ -67,18 +70,22 @@ class DeepBeliefRBM(object):
         # Dimension of gen_weights is (#hidden x #visible)
         self.gen_weights = np.copy(self.rbm.w.T)
         self.rec_bias_hidden = self.gen_bias_hidden = np.copy(self.b)
-        self.rec_bias_visible = self.gen_bias_visible = np.copy(self.a)
+        self.gen_bias_visible = np.copy(self.a)
 
     def up_pass(self, batch, mean_field = True):
-        # computes the fan in into hidden nodes, fan_in_hidden.shape = batch_size x num_hidden
-        fan_in_hidden = np.dot(batch, self.rec_weights) + np.kron(np.ones(batch.shape), self.rec_bias_hidden.T)
+	pause()
+
+	# computes the fan in into hidden nodes, fan_in_hidden.shape = batch_size x num_hidden
+        fan_in_hidden = np.dot(batch, self.rec_weights)
+        fan_in_hidden = np.apply_along_axis(lambda x : x + self.rec_bias_hidden.T, 0, fan_in_hidden)
         # compute the activation of each hidden node, hidden_act.shape = batch_size x hidden_act
         hidden_act = self.rbm.act_fn(fan_in_hidden)
         # comupte the state of the hidden node, hidden_state.shape = batch_size x num_hidden
         hidden_state = hidden_act > np.random.uniform(size=hidden_act.shape)
         
         # compute reconstruction fan-in
-        fan_in_visible = np.dot(hidden_state, self.gen_weights) + np.kron(np.ones((len(batch),1), self.gen_bias_visible.T))
+        fan_in_visible = np.dot(hidden_state, self.gen_weights)
+        fan_in_visible = np.apply_along_axis(lambda x : x + self.rec_bias_visible.T, 0, fan_in_visible)
         # compute visible activation
         visible_act = self.rbm.act_fn(fan_in_visible)
 
@@ -105,18 +112,46 @@ class DeepBeliefRBM(object):
 
         return hidden_act if mean_field else hidden_state
 
-    def down_pass(self, batch):
+    def down_pass(self, batch, mean_field = False):
+	pause()
+
         # computes the fan in into the visible node
-        fan_in_visible = np.dot(batch, self.gen_weights) + np.kron(np.ones(batch.shape), self.gen_bias_visible)
+        fan_in_visible = np.dot(batch, self.gen_weights)
+        fan_in_visible = np.apply_along_axis(lambda x : x + self.gen_bias_visible.T, 0, fan_in_visible)
         # compute the activation of the visible nodes
         visible_act = self.rbm.act_fn(fan_in_visible)
         # comute the states of the visible nodes
         visible_state = visible_act > np.random.uniform(size=visible_act.shape)
 
         # compute hidden fan in for reconstruction
-        fan_in_hidden = np.dot(visible_state, self.rec_weights) + np.kron(np.ones(batch.shape), self.rec_bias_hidden)
+        fan_in_hidden = np.dot(visible_state, self.rec_weights)
+        fan_in_hidden = np.apply_along_axis(lambda x : self.gen_bias_hidden.T, 0, fan_in_hidden)
         # compute hidden activation
         hidden_act = self.rbm.act_fn(fan_in_hidden)
+        hidden_state = hidden_act > np.random.uniform(size = hidden_act.shape)
+
+        # calculate weight delta
+        delta_w = np.dot((batch - hidden_act).T, visible_state)
+        delta_w = (self.lrate / len(batch)) * delta_w - self.rec_weights * self.wcost + self.momentum * self.d_rec_weights
+        # weight update
+        self.rec_weights += delta_w
+        self.d_rec_weights = delta_w
+
+        # calculate hidden bias delta
+        delta_bias_hidden = (hidden_state - hidden_act).mean(acis=0).T
+        delta_bias_hidden = self.lrate * delta_bias_hidden - self.wcost * self.rec_bias_hidden + \
+                            self.momentum * self.d_rec_bias_hidden
+        self.rec_bias_hidden += delta_bias_hidden
+        self.d_rec_bias_hidden = np.copy(delta_bias_hidden)
+
+        # caluclate bias delta, delta_bias_visible.shape = num_visible x 1
+        delta_bias_visible = (batch - visible_act).mean(axis=0).T
+        delta_bias_visible = self.lrate * delta_bias_visible - self.wcost * self.rec_bias_visible + \
+                            self.momentum * self.d_rec_bias_visible
+        self.rec_bias_visible += delta_bias_visible
+        self.d_rec_weights = np.copy(delta_bias_visible)
+
+        return visible_act if mean_field else visible_state
 
 class DBN(Network):
     def __init__(self, lrate, momentum, wcost, layer_units, n_in_minibatch=10, k=1, v_shape_bottom=None):
@@ -136,11 +171,13 @@ class DBN(Network):
         # create rbms
         self.n_layers = len(layer_units)
         self.n_rbms = self.n_layers-1
-        self.rbms = []
+        self.layers = []
         for n_v, n_h in zip(layer_units[:-1], layer_units[1:]):
             rbm = RbmNetwork(n_v, n_h, n_sampling_steps=k)
-            self.rbms.append(rbm)
-        if self.v_shape_bottom: self.rbms[0].v_shape = self.v_shape_bottom
+            rbmLayer = DeepBeliefRBM(rbm, 0.001, 0, 0)
+            self.layers.append(rbmLayer)
+
+        if self.v_shape_bottom: self.layers[0].v_shape = self.v_shape_bottom
 
     def test_trial(self, v_input):
         # go all the way up
@@ -154,19 +191,22 @@ class DBN(Network):
         raise NotImplementedError()
 
     def train_greedy(self, train_patterns, n_train_epochs, valid_patterns=None, should_plot=None, should_print=None):
-        if not n_train_epochs:
+       	
+	pause()
+	if not n_train_epochs:
             print 'Skipping greedy training'
             return
         layer_input = train_patterns
-        nRBMs = len(self.rbms)
-        for counter, rbm in enumerate(self.rbms):
+        for counter, rbmLayer in enumerate(self.layers):
             print 'Training greedy %i x %i net (%i of %i RBMs)' % \
-                (rbm.n_v, rbm.n_h, counter, self.n_rbms)
-            rbm.train(layer_input,
+                (rbmLayer.rbm.n_v, rbmLayer.rbm.n_h, counter, len(self.layers))
+
+            rbmLayer.train_greedy(layer_input,
                       n_train_epochs=n_train_epochs,
                       should_print=should_print,
                       should_plot=should_plot)
-            _, layer_input = rbm.propagate_fwd(layer_input)
+            _, layer_input = rbmLayer.rbm.propagate_fwd(layer_input)
+
         if valid_patterns is not None:
             rand_ix = choice(range(len(valid_patterns)))
             self.plot_layers(valid_patterns[rand_ix, :], ttl='Greedy after %i epochs' % n_train_epochs)
@@ -174,98 +214,31 @@ class DBN(Network):
     def train_backfitting(self, train_patterns, n_train_epochs, \
                     valid_patterns=None, should_print=None, should_plot=None):
         for epochnum in range(n_train_epochs):
+            vis_states = grab_minibatch(train_patterns, self.n_in_minibatch)
+            for batch in vis_states:
+                # make up pass by ignoring the last layer
+                for rbmLayer in self.layers[:-1]:
+                    batch = rbmLayer.up_pass(batch)
+                # sample at the top
+                _, _, _, batch, _, _, _, _, _ = self.layers[-1].rbm.k_gibbs_steps(batch)
+                # make down pass
+                for rbmLayer in reversed(self.layers[:-1]):
+                    batch = rbmLayer.down_pass(batch)
 
             if should_print and should_print(epochnum):
                 print 'Training backfitting (%i of %i epochs)' % (epochnum, n_train_epochs)
             if should_plot and should_plot(epochnum) and valid_patterns is not None:
                 rand_ix = choice(range(len(valid_patterns)))
                 self.plot_layers(valid_patterns[rand_ix, :], ttl='Backfitting after %i epochs' % epochnum)
-            vis_states = grab_minibatch(train_patterns, self.n_in_minibatch)        
-             # obtain intial values from bottom rbm
-            _, _, _, _, vis_probs, vis_states, _, _, _ = self.rbms[0].k_gibbs_steps(vis_states, k=1)
-            # start backfitting
-            _, top_state = self.up_pass(vis_probs, vis_states)
-            v_k_probs, v_k_state = self.run_cdk_on_top_layers(top_state)
-            self.down_pass(v_k_probs, v_k_state)
-                    
-    def up_pass(self, h_0_probs, h_0_state):
-        """
-        Performs an up pass on the data and performs mean-field updates of
-        generative weights
-        """
-        batch_size = len(h_0_state)
 
-        for rbm in self.rbms[:-1]: # skip last RBM, we'll do CD-k there
-            # compute forward activation
-            _, h_1_probs = rbm.propagate_fwd(h_0_state)
-            h_1_state = rbm.samplestates(h_1_probs)
-
-            # perform generative weight update
-            diff_h0 = (h_0_state - h_0_probs)
-            delta_w = np.dot(diff_h0.T, h_1_state)
-            delta_bias_vis = diff_h0
-            delta_bias_hid = (h_1_state - h_1_probs)
-
-            delta_w = self.lrate / batch_size * delta_w
-            delta_bias_vis = (self.lrate / batch_size * delta_bias_vis).mean(axis=0)
-            delta_bias_hid = (self.lrate / batch_size * delta_bias_hid).mean(axis=0)
-
-            print "Up ", delta_w
-
-            #rbm.w = rbm.w + delta_w
-            #rbm.a = rbm.a + delta_bias_vis
-            #rbm.b = rbm.b + delta_bias_hid
-
-            # feed activations into higher-level RBM
-            h_0_probs = h_1_probs
-            h_0_state = h_1_state
-
-        return h_1_probs, h_1_state
-
-    def down_pass(self, h_1_probs, h_1_state):
-        """
-        Performs a downward pass on the data and performs mean-field updates of
-        the network's recognition weights
-        """
-        batch_size = len(h_1_state)
-
-        for rbm in reversed(self.rbms[:-1]): # go from (top layer - 1) to 0
-            # compute backward activation
-            _, h_0_probs = rbm.propagate_back(h_1_state)
-            h_0_state = rbm.samplestates(h_0_probs)
-            # perform recognition weight update
-            diff_h_1 = (h_1_state - h_1_probs)
-            delta_w = np.dot(h_0_state.T, diff_h_1)
-            delta_bias_vis = (h_0_state - h_0_probs)
-            delta_bias_hid = diff_h_1
-
-            delta_w = self.lrate / batch_size * delta_w
-            delta_bias_vis = (self.lrate / batch_size * delta_bias_vis).mean(axis=0)
-            delta_bias_hid = (self.lrate / batch_size * delta_bias_hid).mean(axis=0)
-
-            print "Down ", delta_w
-            
-            #rbm.w = rbm.w + delta_w
-            #rbm.a = rbm.a + delta_bias_vis
-            #rbm.b = rbm.b + delta_bias_hid
-
-            h_1_probs = h_0_probs
-            h_1_state = h_0_state
-        return h_0_probs, h_0_state
-
-    def run_cdk_on_top_layers(self, v_plus):
-        # get v_plus 
-        top_rbm = self.rbms[-1]
-        _, _, _, _, v_k_act, v_k_state, _, _, _ = top_rbm.k_gibbs_steps(v_plus) # v_minus after k-step CD
-        return v_k_act, v_k_state
 
     def propagate_fwd_all(self, acts):
-        for rbm in self.rbms:
+        for rbm in self.layers:
             _, acts = rbm.propagate_fwd(acts)
         return acts
 
     def propagate_back_all(self, h_1_probs):
-        for rbm in reversed(self.rbms):
+        for rbm in reversed(self.layers):
             h_1_state = rbm.samplestates(h_1_probs)
             _, h_1_probs = rbm.propagate_back(h_1_state)
         return h_1_probs
@@ -274,7 +247,7 @@ class DBN(Network):
         h_plus_top = self.propagate_fwd_all(v_plus_bottom)
         v_minus_bottom = self.propagate_back_all(h_plus_top)
         v_shape = self.v_shape_bottom
-        bottom_rbm = self.rbms[0]
+        bottom_rbm = self.layers[0]
     	plot_rbm_2layer(v_plus_bottom.reshape(v_shape),
                         None, None, None,
                         None, v_minus_bottom.reshape(v_shape), v_minus_bottom.reshape(v_shape),

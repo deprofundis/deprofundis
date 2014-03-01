@@ -10,7 +10,7 @@ from utils.utils import deriv_sigmoid, deriv_tanh, imagesc, sigmoid, sumsq, tanh
 
 class BackpropNetwork(Network):
     def __init__(self, layersizes, lrate=0.01, momentum=0.9, plot=True):
-        assert len(layersizes) >= 3 # incl inpout & output
+        assert len(layersizes) >= 3 # incl input & output
         self.layersizes = layersizes
         self.w, self.d_w = self.init_weights(scale=1), self.init_weights(0)
         self.b, self.d_b = self.init_biases(), self.init_biases()

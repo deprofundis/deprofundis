@@ -104,15 +104,14 @@ class BackpropNetwork(Network):
 
 def arr_str(arr): return np.array_str(arr, precision=2)
 
-def test_epoch(net, acts0, targets, verbose=True):
-    errors = []
-    for act0, target in zip(acts0, targets):
-        error, out = net.test_trial(act0, target)
-        errors.append(error)
-        if verbose:
-            print '%s, %s -> %s, err = %.2f' % (arr_str(act0), arr_str(target), arr_str(out), error)
+def test_epoch(net, acts0, targets, epochnum=-1, verbose=True):
+    errors, outs = net.test_trial(acts0, targets)
+    if verbose:
+        for act0, target, out, error in zip(acts0, targets, outs, errors):
+            print '%s, %s -> %s, err = %.2f' % \
+                (arr_str(act0), arr_str(target), arr_str(out), error)
     mean_error = np.mean(errors)
-    print '%i) err = %.2f' % (e, mean_error)
+    print '%i) err = %.2f' % (epochnum, mean_error)
     return errors, mean_error
 
 def xor(*args, **kwargs):

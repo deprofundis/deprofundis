@@ -30,15 +30,18 @@ def gen_minibatch_idx(n, n_per_mb):
     for idx in grouper(all_idx, n_per_mb):
         yield idx
 
-def gen_minibatch(n_in_mb, arr1, arr2=None):
+def gen_minibatch(arr1, arr2=None, n_in_mb=None):
     """
     e.g.
-        from deprofundis.utils.utils import gen_minibatch
+        from deprofundis.utils.minibatch import gen_minibatch
         arr1 = np.array([[10,20,30,40,50,60,70], [100,200,300,400,500,600,700], [1000,2000,3000,4000,5000,6000,7000]]).T
         arr2 = arr1 + 1
-        for mb in gen_minibatch(3, arr1, arr2):
+        for mb in gen_minibatch(arr1, arr2, 3):
             print mb
     """
+    # if they fed in 2 args, switch the 2nd and 3rd
+    if arr2 is not None and n_in_mb is None and isinstance(arr2, int):
+        n_in_mb, arr2 = arr2, n_in_mb
     n = len(arr1)
     if arr2 is None:
         for idx in gen_minibatch_idx(n, n_in_mb):

@@ -9,13 +9,6 @@ class HashableDict(dict):
         return hash(tuple(sorted(self.items())))
 
 
-def grab_minibatch(patterns, n_in_minibatch):
-    assert len(patterns.shape) == 2
-    ix = np.arange(len(patterns))
-    np.random.shuffle(ix)
-    ix = ix[:n_in_minibatch]
-    return patterns[ix,:]
-
 def imagesc(data, dest=None, grayscale=True, vmin=None, vmax=None):
     cmap = plt.cm.gray if grayscale else None
     if dest is None:

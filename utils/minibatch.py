@@ -30,7 +30,7 @@ def gen_minibatch_idx(n, n_per_mb):
     for idx in grouper(all_idx, n_per_mb):
         yield idx
 
-def gen_minibatch(arr1, arr2=None, n_in_mb=None):
+def gen_minibatch(arr1, arr2=None, n_per_mb=None):
     """
     e.g.
         from deprofundis.utils.minibatch import gen_minibatch
@@ -40,13 +40,13 @@ def gen_minibatch(arr1, arr2=None, n_in_mb=None):
             print mb
     """
     # if they fed in 2 args, switch the 2nd and 3rd
-    if arr2 is not None and n_in_mb is None and isinstance(arr2, int):
-        n_in_mb, arr2 = arr2, n_in_mb
+    if arr2 is not None and n_per_mb is None and isinstance(arr2, int):
+        n_per_mb, arr2 = arr2, n_per_mb
     n = len(arr1)
     if arr2 is None:
-        for idx in gen_minibatch_idx(n, n_in_mb):
+        for idx in gen_minibatch_idx(n, n_per_mb):
             yield arr1[idx,:]
     else:
         assert arr1.shape[0] == arr2.shape[0]
-        for idx in gen_minibatch_idx(n, n_in_mb):
+        for idx in gen_minibatch_idx(n, n_per_mb):
             yield arr1[idx,:], arr2[idx,:]

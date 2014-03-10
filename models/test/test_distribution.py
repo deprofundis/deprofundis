@@ -54,10 +54,9 @@ class BernoulliTest(unittest.TestCase):
     """
     Test class for the Bernoulli distribution implementation
     """
-    # use a matrix of only ones to better test
-    weights=np.ones(shape=SHAPE)
-    bias_hidden=np.ones(shape=HIDDEN_UNITS)
-    bias_visible=np.ones(shape=VISIBLE_UNITS)
+    weights = np.ones(shape=SHAPE)
+    bias_hidden = np.ones(shape=HIDDEN_UNITS)
+    bias_visible = np.ones(shape=VISIBLE_UNITS)
     vis_inp = np.ones(shape=VISIBLE_UNITS)
     hid_inp = np.ones(shape=HIDDEN_UNITS)
 
@@ -65,27 +64,50 @@ class BernoulliTest(unittest.TestCase):
         """
         Tests whether the correct value for the energy function is returned. All properties (
         """
-        dist = Bernoulli(VISIBLE_UNITS, HIDDEN_UNITS, self.weights, self.bias_hidden, self.bias_visible)
-        target = np.dot(np.dot(self.vis_inp, self.weights), self.hid_inp) + np.dot(self.bias_visible, self.vis_inp) \
-                 + np.dot(self.bias_visible, self.hid_inp)
-        self.assertEqual(target, dist.score_energy(self.vis_inp, self.hid_inp))
+        dist = Bernoulli(VISIBLE_UNITS, HIDDEN_UNITS, weights=self.weights, bias_hidden=self.bias_hidden, bias_visible=self.bias_visible)
+        target = np.sum(self.weights) + np.sum(self.bias_hidden) + np.sum(self.bias_visible)
+        actual = np.abs(dist.score_energy(self.vis_inp, self.hid_inp))
+        self.assertEqual(target, actual, "Didn't match. Target: " + str(target) + ", Actual: " + str(actual))
 
     def test_correct_conditional_prob_v(self):
         """
-        Test whether the conditional probability p(v=1|h) is correctly computed
+        Test whether the conditional probability p(v=1|h) is correctly computed. This function uses the fact that
+        exp(0) = 1 and sigm(1) = 0.5
         """
-        # use the fact that exp(0) is 1
         weights = self.weights * (1 / float(HIDDEN_UNITS))
         bias_visible = self.bias_visible * -1
         dist = Bernoulli(VISIBLE_UNITS, HIDDEN_UNITS, weights, self.bias_hidden, bias_visible)
-        act = dist.conditional_prob_v(self.hid_inp)
-        self.assertEqual(HIDDEN_UNITS, np.sum(act))
+        target = 0.5 * VISIBLE_UNITS
+        actual = dist.conditional_prob_v(self.hid_inp)
+        self.assertEqual(target, np.sum(actual), "Target: " + str(target) + ", Actual: " + str(actual))
 
     def test_correct_conditional_prob_h(self):
         """
-        Test wheather the condtional probability p(h=1|v) is correctly computed
+        Test wheather the condtional probability p(h=1|v) is correctly computed. This function uses the fact that
+        exp(0) = 1 and sigm(1) = 0.5
+        """
+        weights = self.weights * (1 / float(VISIBLE_UNITS))
+        bias_hidden = self.bias_hidden * -1
+        dist = Bernoulli(VISIBLE_UNITS, HIDDEN_UNITS, weights, bias_hidden, self.bias_visible)
+        target = 0.5 * HIDDEN_UNITS
+        actual = dist.conditional_prob_h(self.vis_inp)
+        self.assertEqual(target, np.sum(actual), "Target: " + str(target) + ", Actual: " + str(actual))
+
+    def test_correct_state_v(self):
+        """
+        Tests weather the state of the units is returned properly
         """
         pass
+
+    def test_correct_state_h(self):
+        """
+        Tests weather the state of the units is returned properly
+        """
+        pass
+
+    def test_correct_distribution_type(self):
+        dist = Bernoulli(VISIBLE_UNITS, HIDDEN_UNITS)
+        self.assertEqual(Distribution.Type.DISCRETE, dist.get_distribution_type())
 
 if __name__ == '__main__':
     unittest.main()

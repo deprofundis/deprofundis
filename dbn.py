@@ -19,7 +19,7 @@ import numpy as np
 #   (calculate gradient and update weights)
 #
 #
-# For simplicity: constant number of units per layer
+
 class DeepBeliefRBM(object):
     def __init__(self, rbm, lrate, momentum, wcost):
 
@@ -31,8 +31,7 @@ class DeepBeliefRBM(object):
         self.momentum = momentum
         self.wcost = wcost
 
-        # recognition weights and biases
-
+        # recognition weights and biases (used for inference and updated during wake phase)
         self.rec_weights = None
         self.rec_bias_hidden = None
         self.rec_bias_visible = None
@@ -41,7 +40,8 @@ class DeepBeliefRBM(object):
         self.d_rec_bias_hidden = np.zeros(shape = self.rbm.b.shape)
         self.d_rec_bias_visible = np.zeros(shape = self.rbm.a.shape)
 
-        # generative weights and biases (reverse order since it is propagate top down
+        # generative weights and biases (reverse order since it is propagate top down)
+        # (used for sampling and updated during sleep phase)
         self.gen_weights = None
         self.gen_bias_hidden = None
         self.gen_bias_visible = None
@@ -82,6 +82,7 @@ class DeepBeliefRBM(object):
         hidden_act = self.rbm.act_fn(fan_in_hidden)
         # comupte the state of the hidden node, hidden_state.shape = batch_size x num_hidden
         hidden_state = hidden_act > np.random.uniform(size=hidden_act.shape)
+        
         # compute reconstruction fan-in
         fan_in_visible = np.dot(hidden_state, self.gen_weights)
         fan_in_visible = np.apply_along_axis(lambda x : x + self.rec_bias_visible.T, 0, fan_in_visible)

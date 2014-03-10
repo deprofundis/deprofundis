@@ -5,18 +5,25 @@ from random import shuffle
 
 from base import create_mnist_patternsets, Minibatch2, Network, Patternset
 from plotting import plot_errors
+from utils.error import mean_squared_error
 from utils.utils import deriv_sigmoid, deriv_tanh, imagesc, sigmoid, sumsq, tanh, vec_to_arr
 
 
 class BackpropNetwork(Network):
-    def __init__(self, layersizes, lrate=0.01, momentum=0.9, plot=True):
-        assert len(layersizes) >= 3 # incl inpout & output
+    def __init__(self, layersizes, lrate=0.01, momentum=0.9,
+                 act_fn=sigmoid, deriv_act_fn=deriv_sigmoid, # act_fn=tanh, deriv_act_fn=deriv_tanh,
+                 err_fn=mean_squared_error,
+                 plot=True):
+        assert len(layersizes) >= 3 # incl input & output
         self.layersizes = layersizes
         self.w, self.d_w = self.init_weights(scale=1), self.init_weights(0)
         self.b, self.d_b = self.init_biases(), self.init_biases()
         self.n_l = len(self.layersizes)
         self.momentum = momentum
         self.lrate = lrate
+        self.act_fn = act_fn
+        self.deriv_act_fn = deriv_act_fn
+        self.err_fn = err_fn
 
         self.plot = plot
         self.fignum_errors = 1
@@ -37,7 +44,7 @@ class BackpropNetwork(Network):
     def test_trial(self, act0, tgt):
         inps, acts = self.propagate_fwd_all(act0)
         act_k = acts[-1]
-        err = self.report_error(act_k, tgt)
+        err = self.err_fn(act_k, tgt)
         return err, act_k
 
     def propagate_fwd_all(self, act0):
@@ -49,8 +56,6 @@ class BackpropNetwork(Network):
     def propagate_fwd(self, lowlayer_idx, act):
         w, b = self.w[lowlayer_idx], self.b[lowlayer_idx+1]
         return super(BackpropNetwork, self).propagate_fwd(act, w, b)
-
-    def report_error(self, act_k, tgt): return np.sum(np.power(tgt - act_k, 2), axis=1)
 
     def learn_trial(self, act0, target):
         d_w, d_b = self.delta_weights(act0, target)
@@ -88,15 +93,7 @@ class BackpropNetwork(Network):
         d_w_ij = self.lrate * np.dot(act_i.T, sens_j)
         d_b_j = np.mean(self.lrate * sens_j, axis=0)
         return d_w_ij, d_b_j, sens_j
-
-    def act_fn(self, x): return sigmoid(x)
-    def deriv_act_fn(self, x): return deriv_sigmoid(x)
-
-#     def act_fn(self, x): return tanh(x)
-#     def deriv_act_fn(self, x): return deriv_tanh(x)
     
-    def err_fn(self, actual, desired): return np.pow(actual - desired, 2)
-
     def plot_errors(self, train_errors):
         if not self.plot: return
         return plot_errors(train_errors, fignum=self.fignum_errors)
@@ -104,15 +101,14 @@ class BackpropNetwork(Network):
 
 def arr_str(arr): return np.array_str(arr, precision=2)
 
-def test_epoch(net, acts0, targets, verbose=True):
-    errors = []
-    for act0, target in zip(acts0, targets):
-        error, out = net.test_trial(act0, target)
-        errors.append(error)
-        if verbose:
-            print '%s, %s -> %s, err = %.2f' % (arr_str(act0), arr_str(target), arr_str(out), error)
+def test_epoch(net, acts0, targets, epochnum=-1, verbose=True):
+    errors, outs = net.test_trial(acts0, targets)
+    if verbose:
+        for act0, target, out, error in zip(acts0, targets, outs, errors):
+            print '%s, %s -> %s, err = %.2f' % \
+                (arr_str(act0), arr_str(target), arr_str(out), error)
     mean_error = np.mean(errors)
-    print '%i) err = %.2f' % (e, mean_error)
+    print '%i) err = %.2f' % (epochnum, mean_error)
     return errors, mean_error
 
 def xor(*args, **kwargs):

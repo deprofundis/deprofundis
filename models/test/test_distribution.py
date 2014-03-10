@@ -68,6 +68,7 @@ class BernoulliTest(unittest.TestCase):
         """
         dist = Bernoulli(VISIBLE_UNITS, HIDDEN_UNITS, self.weights, self.bias_hidden, self.bias_visible)
         target = np.dot(np.dot(self.vis_inp, self.weights), self.hid_inp) + np.dot(self.bias_visible, self.vis_inp) \
+
                  + np.dot(self.bias_visible, self.hid_inp)
         self.assertEqual(target, dist.score_energy(self.vis_inp, self.hid_inp))
 

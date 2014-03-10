@@ -10,19 +10,19 @@ class Distribution(object):
         self.size_visible = size_visible
         self.size_hidden = size_hidden
 
-        # Initialize visible bias
+        # Initialize hidden bias
         if bias_hidden is None:
-            self.bias_visible = np.zeros(size_visible)
-        else:
-            assert (bias_visible.shape == size_visible)
-            self.bias_visible = np.copy(bias_hidden)
-
-        # Initial hidden bias
-        if bias_visible is None:
             self.bias_hidden = np.zeros(size_hidden)
         else:
             assert (bias_hidden.shape == size_hidden)
             self.bias_hidden = np.copy(bias_hidden)
+
+        # Initial hidden bias
+        if bias_visible is None:
+            self.bias_visible = np.zeros(size_visible)
+        else:
+            assert (bias_visible.shape == size_visible)
+            self.bias_visible = np.copy(bias_visible)
 
         # Initialize weight matrix
         if weights is None:

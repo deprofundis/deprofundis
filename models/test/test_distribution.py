@@ -21,34 +21,33 @@ class DistributionTest(unittest.TestCase):
         """
         dist = Distribution(VISIBLE_UNITS, HIDDEN_UNITS)
         self.assertEqual(dist.weights.shape,
-                         (VISIBLE_UNITS, HIDDEN_UNITS), "Weight matriy has wrong shape. Should be "
-                                                        "(size visible layer) x (size hidden layer)")
-
+                         (VISIBLE_UNITS, HIDDEN_UNITS),
+                         "Weight matriy has wrong shape. Should be (size visible layer) x (size hidden layer)."
+                         " Actual shape: " + str(dist.weights.shape))
 
     def test_correct_bias_hidden_dimension(self):
         dist = Distribution(VISIBLE_UNITS, HIDDEN_UNITS)
-        self.assertEqual (dist.bias_hidden.shape, HIDDEN_UNITS, "Hidden bias vector has wring shape. "
-                                                                "Should be (size hidden layer) x 1")
-
+        self.assertEqual (dist.bias_hidden.shape, (HIDDEN_UNITS,),
+                          "Hidden bias vector has wring shape. Should be (size hidden layer) x 1. "
+                          "Actual shape: " + str(dist.bias_hidden.shape))
 
     def test_correct_dimension_bias_visible(self):
         dist = Distribution(VISIBLE_UNITS, HIDDEN_UNITS)
-        self.assertEqual(dist.bias_visible.shape, VISIBLE_UNITS, "Visible bias vector has wrong shape. "
-                                                                 "Should be (size visible layer) x 1")
+        self.assertEqual(dist.bias_visible.shape, (VISIBLE_UNITS,),
+                         "Visible bias vector has wrong shape. Should be (size visible layer) x 1. "
+                         "Actual shape: " + str(dist.bias_visible.shape))
 
     def test_error_wrong_weight_matrix_dim(self):
         weights = np.zeros(shape=(15,13))
-        self.assertRaises(AssertionError, Distribution(VISIBLE_UNITS, HIDDEN_UNITS, weights))
+        self.assertRaises(AssertionError, Distribution, VISIBLE_UNITS, HIDDEN_UNITS, weights)
 
-    def test_assert_wrong_hidden_bias_dim(self):
-        bias_hidden = np.ones(shape=12)
-        self.assertRaises(AssertionError, Distribution(VISIBLE_UNITS, HIDDEN_UNITS, weights=None,
-                                                       bias_hidden=bias_hidden))
+    def test_error_wrong_hidden_bias_dim(self):
+        bias_hidden = np.ones(shape=(12))
+        self.assertRaises(AssertionError, Distribution, VISIBLE_UNITS, HIDDEN_UNITS, weights=None, bias_hidden=bias_hidden)
 
     def test_assert_wrong_visible_bias_dim(self):
         bias_visible = np.ones(shape=15)
-        self.assertRaises(AssertionError, Distribution(VISIBLE_UNITS, HIDDEN_UNITS, weights=None, bias_hidden=None,
-                                                       bias_visible=bias_visible))
+        self.assertRaises(AssertionError, Distribution, VISIBLE_UNITS, HIDDEN_UNITS, weights=None, bias_hidden=None, bias_visible=bias_visible)
 
 
 class BernoulliTest(unittest.TestCase):
@@ -57,10 +56,10 @@ class BernoulliTest(unittest.TestCase):
     """
     # use a matrix of only ones to better test
     weights=np.ones(shape=SHAPE)
-    bias_hidden=np.ones(shape=SHAPE)
-    bias_visible=np.ones(shape=SHAPE)
-    vis_inp = np.ones(shape=SHAPE)
-    hid_inp = np.ones(shape=SHAPE)
+    bias_hidden=np.ones(shape=HIDDEN_UNITS)
+    bias_visible=np.ones(shape=VISIBLE_UNITS)
+    vis_inp = np.ones(shape=VISIBLE_UNITS)
+    hid_inp = np.ones(shape=HIDDEN_UNITS)
 
     def test_correct_score(self):
         """
@@ -68,7 +67,6 @@ class BernoulliTest(unittest.TestCase):
         """
         dist = Bernoulli(VISIBLE_UNITS, HIDDEN_UNITS, self.weights, self.bias_hidden, self.bias_visible)
         target = np.dot(np.dot(self.vis_inp, self.weights), self.hid_inp) + np.dot(self.bias_visible, self.vis_inp) \
-
                  + np.dot(self.bias_visible, self.hid_inp)
         self.assertEqual(target, dist.score_energy(self.vis_inp, self.hid_inp))
 
@@ -80,3 +78,14 @@ class BernoulliTest(unittest.TestCase):
         weights = self.weights * (1 / float(HIDDEN_UNITS))
         bias_visible = self.bias_visible * -1
         dist = Bernoulli(VISIBLE_UNITS, HIDDEN_UNITS, weights, self.bias_hidden, bias_visible)
+        act = dist.conditional_prob_v(self.hid_inp)
+        self.assertEqual(HIDDEN_UNITS, np.sum(act))
+
+    def test_correct_conditional_prob_h(self):
+        """
+        Test wheather the condtional probability p(h=1|v) is correctly computed
+        """
+        pass
+
+if __name__ == '__main__':
+    unittest.main()

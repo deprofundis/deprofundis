@@ -16,6 +16,29 @@ def grab_minibatch(patterns, n_in_minibatch):
     ix = ix[:n_in_minibatch]
     return patterns[ix,:]
 
+
+def prepare_batches(len_data,len_batch):
+    """
+    Computes the start and stop indexes for a batch of data.
+    @param len_data: Lenght of the entire data set
+    @param len_batch: Length of a single batch
+    @return: An array that contains start and stop indexes
+    """
+    # compute number of batches
+    num_batch = np.floor(len_data / float(len_batch))
+    # compute minimum index length
+    idx = np.arange(num_batch * len_batch)
+    # shape to batch sizes
+    idx = np.reshape(idx, (num_batch, len_batch))
+    # take the first and the last column to have a start and a stop column
+    idx = np.array((
+        np.append(idx[:,0], num_batch * len_batch),
+        np.append(idx[:,-1], len_data-1))).T
+    # shuffle our indizes
+    np.random.shuffle(idx)
+    return idx
+
+
 def imagesc(data, dest=None, grayscale=True, vmin=None, vmax=None):
     cmap = plt.cm.gray if grayscale else None
     if dest is None:

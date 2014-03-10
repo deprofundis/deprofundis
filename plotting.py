@@ -1,4 +1,4 @@
-from ipdb import set_trace as pause
+# from ipdb import set_trace as pause
 from math import ceil, sqrt
 from matplotlib import pyplot as plt
 import matplotlib.gridspec as gridspec
@@ -22,6 +22,7 @@ def plot_biases(v_bias, h_bias, fignum=None, ttl=None):
     ax = fig.add_subplot(gs[0,0]); im = imagesc(v_bias, dest=ax, vmin=vmin, vmax=vmax); ax.set_title('v bias'); fig.colorbar(im)
     ax = fig.add_subplot(gs[0,1]); im = imagesc(h_bias, dest=ax, vmin=vmin, vmax=vmax); ax.set_title('h bias'); fig.colorbar(im)
     plt.draw()
+
 
 def plot_errors(train_errors, valid_errors=None, test_errors=None, fignum=None):
     setup_plot()

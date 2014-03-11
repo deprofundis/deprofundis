@@ -57,14 +57,24 @@ class SGD(Optimizer):
         """
         # get batch size
         batch_size = len(visible_0_states)
-        # assert inputs for correct dimensions
-        assert (visible_0_states.shape == (batch_size, self.model_distribution.size_visible))
-        assert (visible_k_states.shape == (batch_size, self.model_distribution.size_visible))
-        assert (visible_k_probs.shape == (batch_size, self.model_distribution.size_visible))
-        assert (hidden_0_states.shape == (batch_size, self.model_distribution.size_hidden))
-        assert (hidden_0_probs.shape == (batch_size, self.model_distribution.size_hidden))
-        assert (hidden_k_probs.shape == (batch_size, self.model_distribution.size_hidden))
-        assert (hidden_k_states.shape == (batch_size, self.model_distribution.size_hidden))
+
+        # assert correct dimensions
+        assert (all(dim == visible_0_states.ndim for dim in [visible_k_probs.ndim, visible_k_states]))
+        assert (all(dim == hidden_0_states.ndim for dim in [hidden_0_probs.ndim, hidden_k_probs.ndim,
+                                                            hidden_k_states.ndim]))
+        # assert inputs for correct shapes dimensions
+        assert (self.model_distribution.size_visible in visible_0_states.shape)
+        assert (self.model_distribution.size_visible in visible_k_states.shape)
+        assert (self.model_distribution.size_visible in visible_k_probs.shape)
+        assert (self.model_distribution.size_hidden in hidden_0_states.shape)
+        assert (self.model_distribution.size_hidden in hidden_0_probs.shape)
+        assert (self.model_distribution.size_hidden in hidden_k_probs.shape)
+        assert (self.model_distribution.size_hidden in hidden_k_states.shape)
+        # assert correct batch size
+        if visible_k_probs.ndim > 1:
+            assert (all(batch == len(visible_0_states) for batch in [len(hidden_0_states), len(hidden_0_probs),
+                                                                     len(hidden_k_probs), len(hidden_k_states),
+                                                                     len(visible_k_probs), len(visible_k_states)]))
 
         # calculate update for weights
         d_weight_update = (np.dot(visible_0_states.T, hidden_0_probs) -

@@ -14,7 +14,11 @@ class Sampler():
     def sample(self, initial):
         raise NotImplementedError
 
+
 class BlockGibbsSampler(Sampler):
+    """
+    Implements a Block Gibbs Sampler.
+    """
     def __init__(self, model_distribution, sampling_steps=1):
         Sampler.__init__(self, model_distribution)
 
@@ -22,7 +26,7 @@ class BlockGibbsSampler(Sampler):
 
     def sample(self, visible_0_state):
         # assert that the initial data sample has the correct shape
-        assert (visible_0_state.shape == (len(visible_0_state), self.model_distribution.size_visible))
+        assert (self.model_distribution.size_visible in visible_0_state.shape)
         # calculate the initial state for the hidden unit
         hidden_0_prob, hidden_0_state = self.model_distribution.state_h(visible_0_state)
         # copy the value since a numpy array is a mutable object, there it will get changed during the sampling process

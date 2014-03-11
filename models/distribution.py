@@ -110,7 +110,7 @@ class Bernoulli(Distribution):
         # assert correct shape (size of batch) x (size of hidden layer)
         assert (self.size_hidden in hidden.shape)
         # returns a matrix (size of batch) x (size of visible layer)
-        return act_fn.sigmoid(self.bias_visible + np.dot(self.weights, hidden))
+        return act_fn.sigmoid(self.bias_visible + np.dot(hidden, self.weights.T))
 
     def conditional_prob_h(self, visible):
         # assert correct shape (size of batch) x (size of visible layer)

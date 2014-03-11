@@ -55,13 +55,10 @@ class SGD(Optimizer):
         @param visible_k_states: states of the visible units after k sampling steps
         @return: delta values for parameter update
         """
-        # get batch size
-        batch_size = len(visible_0_states)
-
         # assert correct dimensions
-        assert (all(dim == visible_0_states.ndim for dim in [visible_k_probs.ndim, visible_k_states]))
-        assert (all(dim == hidden_0_states.ndim for dim in [hidden_0_probs.ndim, hidden_k_probs.ndim,
-                                                            hidden_k_states.ndim]))
+        assert (all(dim == visible_0_states.ndim for dim in (visible_k_probs.ndim, visible_k_states.ndim)))
+        assert (all(dim == hidden_0_states.ndim for dim in (hidden_0_probs.ndim, hidden_k_probs.ndim,
+                                                            hidden_k_states.ndim)))
         # assert inputs for correct shapes dimensions
         assert (self.model_distribution.size_visible in visible_0_states.shape)
         assert (self.model_distribution.size_visible in visible_k_states.shape)
@@ -78,11 +75,10 @@ class SGD(Optimizer):
 
         # calculate update for weights
         d_weight_update = (np.dot(visible_0_states.T, hidden_0_probs) -
-                           np.dot(visible_k_probs.T, hidden_k_probs)) / float(batch_size)
+                           np.dot(visible_k_states.T, hidden_k_probs)) / float(len(visible_0_states))
         d_weight_update = self.ascent_factor * self.learning_rate * d_weight_update \
                           - self.weigth_decay * self.model_distribution.weights \
                           + self.momentum * self.d_weights
-        d_weight_update += self.d_weights
 
         # calculate update for hidden biases
         d_bias_hidden_update = np.mean(hidden_0_probs - hidden_k_probs,axis=0)
@@ -91,7 +87,7 @@ class SGD(Optimizer):
                                + self.momentum * self.d_bias_hidden
 
         # Calculate update for visible bias
-        d_bias_visible_update = np.mean(visible_0_states - visible_k_probs,axis=0)
+        d_bias_visible_update = np.mean(visible_0_states - visible_k_states,axis=0)
         d_bias_visible_update = self.ascent_factor * self.learning_rate * d_bias_visible_update \
                                - self.weigth_decay * self.model_distribution.bias_visible \
                                + self.momentum * self.d_bias_visible

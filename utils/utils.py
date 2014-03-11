@@ -30,10 +30,14 @@ def prepare_batches(len_data,len_batch):
     idx = np.arange(num_batch * len_batch)
     # shape to batch sizes
     idx = np.reshape(idx, (num_batch, len_batch))
+    idx = np.array([idx[:,0], idx[:,-1]])
+    idx = idx.T
     # take the first and the last column to have a start and a stop column
-    idx = np.array((
-        np.append(idx[:,0], num_batch * len_batch),
-        np.append(idx[:,-1], len_data-1))).T
+    mod = len_data % float(len_batch)
+    if mod > 0:
+        low_index = idx[-1,0] + 1
+        high_index = (len_data-1)
+        idx = np.vstack([idx, [low_index,high_index]])
     # shuffle our indizes
     np.random.shuffle(idx)
     return idx

@@ -26,7 +26,9 @@ class Distribution(object):
 
         # Initialize weight matrix
         if weights is None:
-            self.weights = np.random.uniform(0, 1, size=(size_visible, size_hidden))
+            self.weights = np.random.uniform(-4 * np.sqrt(6. / (size_hidden + size_visible)),
+                                             4 * np.sqrt(6. / (size_hidden + size_visible)),
+                                             size=(size_visible, size_hidden))
         else:
             assert (weights.shape == (size_visible, size_hidden))
             self.weights = np.copy(weights)
@@ -110,13 +112,17 @@ class Bernoulli(Distribution):
         # assert correct shape (size of batch) x (size of hidden layer)
         assert (self.size_hidden in hidden.shape)
         # returns a matrix (size of batch) x (size of visible layer)
-        return act_fn.sigmoid(self.bias_visible + np.dot(hidden, self.weights.T))
+        fan = self.bias_visible + np.dot(hidden, self.weights.T)
+        act = act_fn.sigmoid(fan)
+        return act
 
     def conditional_prob_h(self, visible):
         # assert correct shape (size of batch) x (size of visible layer)
         assert (self.size_visible in visible.shape)
         # returns a matrix (size of batch) x (size of hidden layer)
-        return act_fn.sigmoid(self.bias_hidden + np.dot(visible, self.weights))
+        fan = self.bias_hidden + np.dot(visible, self.weights)
+        act = act_fn.sigmoid(fan)
+        return act
 
     def state_v(self, hidden):
         # assert correct shape (size of batch) x (size of hidden layer)

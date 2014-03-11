@@ -14,9 +14,9 @@ SIZE_HIDDEN = 500
 SIZE_VISIBLE = 784
 
 # load binary mnist sample dataset
-dataset = pandas.read_csv(MNIST_TRAIN_BINARY, delimiter=',', dtype=int, header=None)
+dataset = pandas.read_csv(MNIST_TEST_BINARY, delimiter=',', dtype=int, header=None)
 # leave the first column out since it contains the labels
-dataset = dataset.values[:, 1:]
+dataset = dataset.values # [:, 1:]
 # compute batch set
 idx = prepare_batches(len(dataset), SIZE_BATCH)
 
@@ -46,7 +46,3 @@ for epoch in range(EPOCHS):
             pyplot.plot(y_axis)
             pyplot.draw()
             time.sleep(0.1)
-
-        print "Max d_weight: " + str(numpy.max(d_weight_update)) + ", Min d_weight: " + str(numpy.min(d_weight_update))
-
-raw_input()

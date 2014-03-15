@@ -25,6 +25,13 @@ class RBM():
 
         return d_weight_update, d_bias_hidden_update, d_bias_visible_update
 
+    def reconstruct(self, data, steps=1):
+        for i in range(steps):
+            hidden_prob, hidden_state = self.model_distribution.state_h(data)
+            rec_prob, rec_state = self.model_distribution.state_v(hidden_state)
+
+        return rec_prob, rec_state
+
     def compute_reconstruction_error(self, data):
         """
         Computes the reconstruction error for a given dataset
@@ -37,10 +44,7 @@ class RBM():
         if self.model_distribution.get_distribution_type() is Distribution.Type.DISCRETE:
             return (np.sum(np.abs(data - rec_state)) / float(data.size)) * 100
         else:
-            # computes the standard deviaton over each batch (row) and takes the mean. The expected behaviour is
-            # that in the course of learning the mean deviation decreases
-            return np.mean(np.std(data-rec_state, axis=1))
-
+            raise NotImplementedError
 
     def compute_likelihood(self):
         pass

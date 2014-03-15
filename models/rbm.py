@@ -31,14 +31,15 @@ class RBM():
         @param data: dataset the check the model
         @return: Pixel-wise calculated reconstruction error
         """
+        hidden_prob, hidden_state = self.model_distribution.state_h(data)
+        rec_prob, rec_state = self.model_distribution.state_v(hidden_state)
+
         if self.model_distribution.get_distribution_type() is Distribution.Type.DISCRETE:
-            hidden_prob, hidden_state = self.model_distribution.state_h(data)
-            rec_prob, rec_state = self.model_distribution.state_v(hidden_state)
-
-            return (np.sum(np.abs(data - rec_state)) / float(data.size))
+            return (np.sum(np.abs(data - rec_state)) / float(data.size)) * 100
         else:
-            raise NotImplementedError
-
+            # computes the standard deviaton over each batch (row) and takes the mean. The expected behaviour is
+            # that in the course of learning the mean deviation decreases
+            return np.mean(np.std(data-rec_state, axis=1))
 
 
     def compute_likelihood(self):

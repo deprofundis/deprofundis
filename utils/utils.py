@@ -42,7 +42,6 @@ def prepare_batches(len_data,len_batch):
     np.random.shuffle(idx)
     return idx
 
-
 def imagesc(data, dest=None, grayscale=True, vmin=None, vmax=None):
     cmap = plt.cm.gray if grayscale else None
     if dest is None:

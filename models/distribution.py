@@ -26,8 +26,8 @@ class Distribution(object):
 
         # Initialize weight matrix
         if weights is None:
-            self.weights = np.random.uniform(-0.4 * np.sqrt(6. / (size_hidden + size_visible)),
-                                             0.44 * np.sqrt(6. / (size_hidden + size_visible)),
+            self.weights = np.random.uniform(-4 * np.sqrt(6. / (size_hidden + size_visible)),
+                                             4 * np.sqrt(6. / (size_hidden + size_visible)),
                                              size=(size_visible, size_hidden))
         else:
             assert (weights.shape == (size_visible, size_hidden))

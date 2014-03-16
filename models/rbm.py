@@ -15,13 +15,20 @@ class RBM():
         self.optimizer = optimizer
 
     def train_batch(self, data):
+        # sample data from model
         hidden_0_probs, hidden_0_states, \
             hidden_k_probs, hidden_k_states, \
             visible_k_probs, visible_k_states = self.sampler.sample(data)
 
+        # copmute deltas
         d_weight_update, d_bias_hidden_update, \
             d_bias_visible_update = self.optimizer.optimize(data, hidden_0_states, hidden_0_probs, hidden_k_probs,
                                                             hidden_k_states, visible_k_probs, visible_k_states)
+
+        # update model values
+        self.model_distribution.weights += d_weight_update
+        self.model_distribution.bias_hidden += d_bias_hidden_update
+        self.model_distribution.bias_visible += d_bias_visible_update
 
         return d_weight_update, d_bias_hidden_update, d_bias_visible_update
 

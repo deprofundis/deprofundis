@@ -43,7 +43,6 @@ class SGD(Optimizer):
         self.d_bias_visible = np.zeros(shape=self.model_distribution.bias_visible.shape)
         self.d_bias_hidden = np.zeros(shape=self.model_distribution.bias_hidden.shape)
 
-
     def optimize(self, visible_0_states, hidden_0_states, hidden_0_probs, hidden_k_probs, hidden_k_states,
              visible_k_probs, visible_k_states):
         """
@@ -99,10 +98,5 @@ class SGD(Optimizer):
         self.d_weights = np.copy(d_weight_update)
         self.d_bias_hidden = np.copy(d_bias_hidden_update)
         self.d_bias_visible = np.copy(d_bias_visible_update)
-
-        # update model values
-        self.model_distribution.weights += d_weight_update
-        self.model_distribution.bias_hidden += d_bias_hidden_update
-        self.model_distribution.bias_visible += d_bias_visible_update
 
         return d_weight_update, d_bias_hidden_update, d_bias_visible_update

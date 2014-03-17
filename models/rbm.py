@@ -4,7 +4,11 @@ from distribution import Distribution
 
 import numpy as np
 
+
 class RBM():
+    """
+    Class represents a restricted boltzmann machine
+    """
     def __init__(self, model_distribution, sampler, optimizer):
         assert (isinstance(model_distribution, Distribution))
         assert (isinstance(sampler, Sampler))
@@ -54,4 +58,18 @@ class RBM():
             raise NotImplementedError
 
     def compute_likelihood(self):
+        pass
+
+
+class RbmVisualizer(object):
+    """
+    Visualizes different elements of the rbm
+    """
+    def __init__(self, plot_weights=True, plot_updates=True):
+        pass
+
+    def plot_weights(self, weights):
+        pass
+
+    def hist(self):
         pass

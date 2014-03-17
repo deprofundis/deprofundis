@@ -1,4 +1,5 @@
 from models.rbm import RBM
+from utils import utils
 from models.optimizer import SGD
 from models.distribution import Distribution
 
@@ -37,7 +38,7 @@ class Layer(object):
         if self.rec_model is None:
             self.rec_model = copy.deepcopy(self.rbm.model_distribution)
 
-        if self.gen_weights is None:
+        if self.gen_model is None:
             self.gen_model = copy.deepcopy(self.rbm.model_distribution)
 
     def wake_pass(self, vis_inp):
@@ -95,13 +96,80 @@ class Layer(object):
 
         return prob_v, state_v
 
+    def propagate_fwd(self, vis_inp):
+        if self.rec_model is None:
+            # we are still in the greedy training
+            return self.rbm.model_distribution.state_h(vis_inp)
+        else:
+            # Greedy layerwise trianing is done and we are in the backfitting phase
+            return self.rec_model.state_h(vis_inp)
+
+
 class DBN(object):
+    """
+    Class that represents a Deep Belief network with arbitrary distributions
+    """
+    def __init__(self, dbn_layers):
+        """
+        @param dbn_layers: Contains all the different layer of the rbm, whereas the layer at index 0 is the start layer
+        """
+        self.dbn_layers = self.__check_layer_fit__(dbn_layers)
+    def __check_layer_fit__(self, dbn_layers):
+        """
+        Function checks that layers are correctly sized which means that the number of hidden units of a layer has to
+        be the same as the number of visible units in the consecutive layer.
+        @param dbn_layers: list that contains all the
+        @return: Returns the list with the all the layers if passed through correctly. If sizes do not fit, an
+        Assertation Error will be thrown
+        """
+        assert (len(dbn_layers) > 1)
 
-    def __init__(self):
-        pass
+        for index,layer in enumerate(dbn_layers):
+            if index < (len(dbn_layers) - 1):
+                cons_layer = dbn_layers[index + 1]
+                hidden_pres = layer.rbm.model_distribution.size_hidden
+                visible_cons = cons_layer.rbm.model_distribution.size_visible
+                # assert that layers fit into each other
+                assert (hidden_pres == visible_cons)
 
-    def greedy_train(self, batch):
-        pass
+        return dbn_layers
 
-    def backfit(self, batch):
-        pass
+    def greedy_train(self, data, batch_size=10, epochs=1):
+        idx = utils.prepare_batches(len(data), batch_size)
+        for index,layer in enumerate(self.dbn_layers):
+            for epoch in range(epochs):
+                for b_idx in idx:
+                    batch = data[b_idx[0]:b_idx[1], :]
+                    # propagate the batch through the already trained
+                    for prop in range(index):
+                        prop_layer = self.dbn_layers[prop]
+                        batch,_ = prop_layer.propagate_fwd(batch)
+
+                    # train RBM in a single layer
+                    layer.greedy_train(batch)
+
+            # initialize the consecutive layer with the biases
+            if index < len(self.dbn_layers) - 1:
+                cons_layer = self.dbn_layers[index + 1]
+                cons_layer.rbm.model_distribution.bias_visible = np.copy(layer.rbm.model_distribution.bias_hidden)
+
+    def backfit(self, data, batch_size=10):
+        idx = utils.prepare_batches(len(data), batch_size)
+        for b_idx in idx:
+            batch = data[b_idx[0]:b_idx[1], :]
+
+            # wake phase
+            for index in range(len(self.dbn_layers)-1):
+                layer = self.dbn_layers[index]
+                batch,_ = layer.wake_pass(batch)
+
+            # sampling in the top layer:
+            top_layer = self.dbn_layers[-1]
+            top_layer.greedy_train(batch)
+            hid_prob, _ = top_layer.rbm.model_distribution.state_h(batch)
+            batch, _ = top_layer.rbm.model_distribution.state_v(hid_prob)
+
+            # sleep phase
+            for index in reversed(range((len(self.dbn_layers)-1))):
+                layer = self.dbn_layers[index]
+                batch,_ = layer.sleep_pass(batch)

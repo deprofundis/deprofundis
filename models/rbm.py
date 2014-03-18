@@ -3,6 +3,7 @@ from optimizer import Optimizer
 from distribution import Distribution
 
 import numpy as np
+import plotting
 
 
 class RBM():
@@ -23,6 +24,10 @@ class RBM():
         hidden_0_probs, hidden_0_states, \
             hidden_k_probs, hidden_k_states, \
             visible_k_probs, visible_k_states = self.sampler.sample(data)
+
+        # plotting
+        plotting.plot_rbm_2layer(data[1,:], None, hidden_0_probs[1,:], hidden_0_states[1,:], None, visible_k_probs[1,:],
+                                 visible_k_states[1,:], None, None, None, fignum=5)
 
         # copmute deltas
         d_weight_update, d_bias_hidden_update, \

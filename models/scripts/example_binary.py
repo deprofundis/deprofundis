@@ -44,8 +44,8 @@ for epoch in range(EPOCHS):
         y_axis.append(rec_error)
         # make simple plot
         if len(y_axis) % 100 is 0:
-            plotting.plot_weights(bernoulli.weights, (28,28), fignum=1)
-            plotting.plot_weights(d_weight_update, (28,28), fignum=2)
+            # plotting.plot_weights(bernoulli.weights, (28,28), fignum=1)
+            # plotting.plot_weights(d_weight_update, (28,28), fignum=2)
             # pyplot.plot(y_axis)
             # pyplot.draw()
-            raw_input()
+            print ""

@@ -26,8 +26,14 @@ class RBM():
             visible_k_probs, visible_k_states = self.sampler.sample(data)
 
         # plotting
-        plotting.plot_rbm_2layer(data[1,:], None, hidden_0_probs[1,:], hidden_0_states[1,:], None, visible_k_probs[1,:],
-                                 visible_k_states[1,:], None, None, None, fignum=5)
+        plotting.plot_rbm_2layer(np.reshape(data[1,:], (28,28)),
+                                None,
+                                np.reshape(hidden_0_probs[1,:], (20,25)),
+                                np.reshape(hidden_0_states[1,:], (20,25)),
+                                None,
+                                np.reshape(visible_k_probs[1,:], (28,28)),
+                                np.reshape(visible_k_states[1,:], (28,28)),
+                                None, None, None, fignum=5)
 
         # copmute deltas
         d_weight_update, d_bias_hidden_update, \

@@ -17,12 +17,7 @@ SIZE_VISIBLE = 784
 dataset = pandas.read_csv(MNIST_TRAIN, delimiter=',', dtype=numpy.float64, header=None)
 # leave the first column out since it contains the labels
 # dataset must be normalized to have unit variance by column (sigma_i == 1)
-dataset = dataset.values[:,1:]
-# std = numpy.std(dataset, axis=0)
-# std = numpy.diag(std)
-# rec = numpy.reciprocal(std)
-# rec[rec == numpy.inf] = 0
-# dataset = numpy.dot(dataset,rec)
+dataset = pre.scale(dataset.values[:,1:], axis=0)
 
 # compute batch set
 idx = prepare_batches(len(dataset), SIZE_BATCH)
@@ -30,14 +25,14 @@ idx = prepare_batches(len(dataset), SIZE_BATCH)
 # load distribution
 gaussian = GaussianBinary(SIZE_VISIBLE, SIZE_HIDDEN)
 gibbs = BlockGibbsSampler(gaussian, sampling_steps=1)
-sgd = SGD(gaussian, learning_rate=0.005, weight_decay=0, momentum=0)
+sgd = SGD(gaussian, learning_rate=0.001, weight_decay=0, momentum=0)
 rbm = RBM(gaussian, gibbs, sgd)
 
-pyplot.figure(1)
-pyplot.ion()
-pyplot.show()
-vmin = numpy.min(dataset)
-vmax = numpy.max(dataset)
+# pyplot.figure(1)
+# pyplot.ion()
+# pyplot.show()
+# vmin = numpy.min(dataset)
+# vmax = numpy.max(dataset)
 
 for epoch in range(EPOCHS):
     for b_idx in idx:
@@ -50,8 +45,10 @@ for epoch in range(EPOCHS):
 
         print "Max: " + str(numpy.max(img)) + " Min: " + str(numpy.min(img))
 
-        pyplot.matshow(img, fignum=0, cmap=pyplot.cm.gray, vmin=vmin , vmax=vmax)
-        pyplot.draw()
-        time.sleep(0.1)
+        # pyplot.hist(d_weight_update)
+        # pyplot.draw()
+        # pyplot.matshow(img, fignum=0, cmap=pyplot.cm.gray, vmin=vmin , vmax=vmax)
+        # pyplot.draw()
+        # time.sleep(0.1)
 
 raw_input()

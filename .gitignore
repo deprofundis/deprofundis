@@ -1,7 +1,7 @@
 *.py[co]
 
 # data
-data/
+data/mnist/csv/
 *.csv
 *.csv.gz
 

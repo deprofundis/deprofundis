@@ -30,7 +30,7 @@ idx = prepare_batches(len(dataset), SIZE_BATCH)
 # load distribution
 gaussian = GaussianBinary(SIZE_VISIBLE, SIZE_HIDDEN)
 gibbs = BlockGibbsSampler(gaussian, sampling_steps=1)
-sgd = SGD(gaussian, learning_rate=0.001, weight_decay=0, momentum=0)
+sgd = SGD(gaussian, learning_rate=0.005, weight_decay=0, momentum=0)
 rbm = RBM(gaussian, gibbs, sgd)
 
 pyplot.figure(1)

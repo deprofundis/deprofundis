@@ -195,4 +195,3 @@ class GaussianBinary(Bernoulli):
 
     def get_distribution_type(self):
         return Distribution.Type.CONTINUOUS
-

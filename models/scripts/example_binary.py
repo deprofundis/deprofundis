@@ -6,6 +6,7 @@ from data.mnist.path import *
 from utils.utils import prepare_batches
 from matplotlib import pyplot
 
+import plotting
 import pandas, numpy, time
 
 SIZE_BATCH = 10
@@ -28,11 +29,11 @@ rbm = RBM(bernoulli, gibbs, sgd)
 
 y_axis = list()
 
-pyplot.plot(y_axis)
-pyplot.ylabel('update')
-pyplot.xlabel('Batch')
-pyplot.ion()
-pyplot.show()
+# pyplot.plot(y_axis)
+# pyplot.ylabel('update')
+# pyplot.xlabel('Batch')
+# pyplot.ion()
+# pyplot.show()
 
 for epoch in range(EPOCHS):
     for b_idx in idx:
@@ -43,6 +44,8 @@ for epoch in range(EPOCHS):
         y_axis.append(rec_error)
         # make simple plot
         if len(y_axis) % 100 is 0:
-            pyplot.plot(y_axis)
-            pyplot.draw()
-            time.sleep(0.1)
+            plotting.plot_weights(bernoulli.weights, (28,28), fignum=1)
+            plotting.plot_weights(d_weight_update, (28,28), fignum=2)
+            # pyplot.plot(y_axis)
+            # pyplot.draw()
+            raw_input()

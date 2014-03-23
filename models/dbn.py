@@ -5,6 +5,9 @@ from models.distribution import Distribution
 
 import numpy as np
 import copy as copy
+import plotting
+import time
+
 
 class Layer(object):
     """
@@ -173,3 +176,8 @@ class DBN(object):
             for index in reversed(range((len(self.dbn_layers)-1))):
                 layer = self.dbn_layers[index]
                 batch,_ = layer.sleep_pass(batch)
+
+            # plotting (axis=0 --> operation over rows, axis=1 --> operation over columns)
+            # prob_v_mean = np.reshape(np.mean(batch, axis=0), (28,28))
+            # plotting.plot_rbm_2layer(v_minus_prob=prob_v_mean,fignum=1)
+            # time.sleep(0.1)

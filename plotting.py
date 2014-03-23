@@ -41,10 +41,10 @@ def plot_errors(train_errors, valid_errors=None, test_errors=None, fignum=None):
     plt.ylim(ymin=0, ymax=max_error*1.1)
     plt.draw()
 
-def plot_rbm_2layer(v_plus,
-                    h_plus_inp, h_plus_prob, h_plus_state,
-                    v_minus_inp, v_minus_prob, v_minus_state,
-                    h_minus_inp, h_minus_prob, h_minus_state,
+def plot_rbm_2layer(v_plus=None,
+                    h_plus_inp=None, h_plus_prob=None, h_plus_state=None,
+                    v_minus_inp=None, v_minus_prob=None, v_minus_state=None,
+                    h_minus_inp=None, h_minus_prob=None, h_minus_state=None,
                     fignum=None, ttl=None):
     setup_plot()
     lmin, lmax = None, None

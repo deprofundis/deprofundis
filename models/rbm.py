@@ -62,15 +62,12 @@ class RBM():
         pass
 
 
-class RbmVisualizer(object):
+class CRBM(object):
     """
-    Visualizes different elements of the rbm
+    Class represents a conditional restricted boltzmann machine.
     """
-    def __init__(self, plot_weights=True, plot_updates=True):
+    def __init__(self):
         pass
 
-    def plot_weights(self, weights):
-        pass
-
-    def hist(self):
+    def train_batch(self):
         pass

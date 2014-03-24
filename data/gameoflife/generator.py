@@ -9,7 +9,7 @@ class Generator(object):
         self.rows = rows
         self.board = None
 
-    def seed(self, offset=5):
+    def seed(self, offset=0):
         """
         Initializes a board
         @param row_num: Number of rows
@@ -18,9 +18,13 @@ class Generator(object):
         @return: Initialized board
         """
         self.board = np.zeros(shape=(self.rows, self.cols),dtype=np.int8)
-        for row in range(offset, self.rows - offset):
-            for col in range(offset, self.cols - offset):
+        for row in range(offset, self.rows - offset, 1):
+            for col in range(offset, self.cols - offset, 1):
                 self.board[row, col] = (np.random.uniform() > 0.5)
+
+        # The board contains only zeros, thus nothing will happen
+        if np.sum(self.board) == 0:
+            self.seed(offset=offset)
 
         return self.board
 
@@ -70,6 +74,8 @@ class Generator(object):
                 else:
                     raise ValueError('The value of a cell can only be 1 or 0.')
 
+        self.board = np.copy(next_board)
+
         return next_board
 
     def alter_alive_cell(self, alive_neighbors):
@@ -105,6 +111,7 @@ class Generator(object):
         alive = 0
         row_max = 0 if (row + 1) > self.rows - 1 else row + 1
         col_max = 0 if (col + 1) > self.cols - 1 else col + 1
+
         for row_idx in (row - 1, row_max):
             for col_idx in (col - 1, col_max):
                 alive += (self.board[row_idx, col_idx] > 0)

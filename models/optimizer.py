@@ -97,7 +97,7 @@ class DynamicSGD(SGD):
     def optimize(self, visible_0_states, hidden_0_states, hidden_0_probs, hidden_k_probs, hidden_k_states,
              visible_k_probs, visible_k_states, visible_lagged):
              
-            assert(visible_lagged.shape[1:2] == (self.model_distribution.size_visible, self.model_distribution.m_lag_visible))
+            assert(visible_lagged.shape[1:] == (self.model_distribution.size_visible, self.model_distribution.m_lag_visible))
             assert(len(hidden_0_probs) == len(visible_k_states)) 
                              
             # now for dynamic biases

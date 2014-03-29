@@ -1,5 +1,5 @@
 from sampler import Sampler
-from optimizer import Optimizer
+from optimizer import SGD, DynamicSGD
 from distribution import Distribution
 
 import numpy as np
@@ -13,7 +13,7 @@ class RBM():
     def __init__(self, model_distribution, sampler, optimizer):
         assert (isinstance(model_distribution, Distribution))
         assert (isinstance(sampler, Sampler))
-        assert (isinstance(optimizer, Optimizer))
+        assert (isinstance(optimizer, SGD))
 
         self.model_distribution = model_distribution
         self.sampler = sampler
@@ -66,8 +66,14 @@ class CRBM(object):
     """
     Class represents a conditional restricted boltzmann machine.
     """
-    def __init__(self):
-        pass
+    def __init__(self, model_distribution, sampler, optimizer):
+        assert (isinstance(model_distribution, Distribution))
+        assert (isinstance(sampler, Sampler))
+        assert (isinstance(optimizer, DynamicSGD))
+
+        self.model_distribution = model_distribution
+        self.sampler = sampler
+        self.optimizer = optimizer
 
     def train_batch(self):
         pass

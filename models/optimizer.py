@@ -86,3 +86,6 @@ class SGD(object):
         self.d_bias_visible = np.copy(d_bias_visible_update)
 
         return d_weight_update, d_bias_hidden_update, d_bias_visible_update
+        
+class DynamicSGD(object):
+    pass

@@ -108,6 +108,44 @@ class BernoulliTest(unittest.TestCase):
     def test_correct_distribution_type(self):
         dist = Bernoulli(VISIBLE_UNITS, HIDDEN_UNITS)
         self.assertEqual(Distribution.Type.DISCRETE, dist.get_distribution_type())
+        
+class DynamicBernoulliTest(unittest.TestCase):
+    """
+    Test class for dynamic bernoulli distribution
+    """
+    def test_correct_score(self):
+        """
+        Tests whether the correct value for the energy function is returned
+        """
+        pass
+
+    def test_correct_conditional_prob_v(self):
+        """
+        Test whether the conditional probability p(v=1|h) is correctly computed
+        """
+        pass
+
+    def test_correct_conditional_prob_h(self):
+        """
+        Test wheather the condtional probability p(h=1|v) is correctly computed
+        """
+        pass
+
+    def test_correct_state_v(self):
+        """
+        Tests weather the state of the units is returned properly
+        """
+        pass
+
+    def test_correct_state_h(self):
+        """
+        Tests weather the state of the units is returned properly
+        """
+        pass
+
+    def test_correct_distribution_type(self):
+        pass
+    
 
 if __name__ == '__main__':
     unittest.main()

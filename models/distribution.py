@@ -270,9 +270,7 @@ class DynamicBernoulli(Distribution):
 
     def get_distribution_type(self):
         return Distribution.Type.DISCRETE
-
-
-
+        
 # TODO Implement variance as parameter into distribution
 class GaussianBinary(Bernoulli):
     """

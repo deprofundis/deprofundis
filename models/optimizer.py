@@ -87,5 +87,46 @@ class SGD(object):
 
         return d_weight_update, d_bias_hidden_update, d_bias_visible_update
         
-class DynamicSGD(object):
-    pass
+class DynamicSGD(SGD):
+    def __init__(self, model_distribution, learning_rate=0.01, weight_decay=0.0002, momentum=0.9, is_ascent=True):
+        SGD.__init__(model_distribution, learning_rate, weight_decay, momentum, is_ascent)
+        
+        self.d_vis_vis = np.zeros(shape=model_distribution.vis_vis_weights.shape) # past delta A
+        self.d_vis_hid = np.zeros(shape=model_distribution.vis_hid_weights.shape) # past delta B
+        
+    def optimize(self, visible_0_states, hidden_0_states, hidden_0_probs, hidden_k_probs, hidden_k_states,
+             visible_k_probs, visible_k_states, visible_lagged):
+             
+            assert(visible_lagged.shape[1:2] == (self.model_distribution.size_visible, self.model_distribution.m_lag_visible))
+            assert(len(hidden_0_probs) == len(visible_k_states)) 
+                             
+            # now for dynamic biases
+            # calculate A
+            d_vis_vis = np.zeros(shape=self.d_vis_vis.shape)
+            d_vis_hid = np.zeros(shape=self.d_vis_hid.shape)
+            for lag in range(self.model_distribution.m_lag_visible):
+                d_vis_vis[:,:,lag] = np.dot(visible_0_states - visible_k_states, visible_lagged[:,:,lag])
+            
+            # calculate B
+            for lag in range(self.model_distribution.n_lag_hidden):
+                d_vis_hid[:,:,lag] = np.dot(hidden_0_states.T, visible_lagged[:,:,lag]) # matrix of size (size_visible x size_hidden)
+                
+            # update
+            d_vis_vis = self.ascent_factor * self.learning_rate * d_vis_vis \
+                               - self.weigth_decay * self.model_distribution.vis_vis_weights \
+                               + self.momentum * self.d_vis_vis
+                               
+            d_vis_hid = self.ascent_factor * self.learning_rate * d_vis_hid \
+                               - self.weigth_decay * self.model_distribution.vis_hid_weights \
+                               + self.momentum * self.d_vis_hid
+            
+            # store values
+            self.d_vis_vis = np.copy(d_vis_vis)
+            self.d_vis_hid = np.copy(d_vis_hid)
+            
+            # W, a, b same as for RBM
+            d_weight_update, d_bias_hidden_update, d_bias_visible_update = super.optimize(visible_0_states, hidden_0_states, 
+                                                                                          hidden_0_probs, hidden_k_probs, hidden_k_states,
+                                                                                          visible_k_probs, visible_k_states)
+    
+            return d_weight_update, d_bias_hidden_update, d_bias_visible_update, d_vis_vis, d_vis_hid

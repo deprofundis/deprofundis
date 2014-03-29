@@ -2,23 +2,7 @@ from distribution import Distribution
 
 import numpy as np
 
-
-class Optimizer():
-    """
-    Interface for an omptimization method such as stochastic gradient descent
-    """
-
-    def __init__(self, model_distribution):
-        assert (isinstance(model_distribution, Distribution))
-
-        self.model_distribution = model_distribution
-
-    def optimize(self, visible_0_states, hidden_0_states, hidden_0_probs, hidden_k_probs, hidden_k_states,
-                 visible_k_probs, visible_k_states):
-        raise NotImplementedError
-
-
-class SGD(Optimizer):
+class SGD(object):
     """
     Implements a version of stochastic gradient descent with the option to also use the stochastic gradient ascent,
     if the normal max. log-likelihood procedure is applied (in case of the negative log-likelihood, it would be
@@ -26,7 +10,9 @@ class SGD(Optimizer):
     """
 
     def __init__(self, model_distribution, learning_rate=0.01, weight_decay=0.0002, momentum=0.9, is_ascent=True):
-        Optimizer.__init__(self, model_distribution)
+        assert (isinstance(model_distribution, Distribution))
+
+        self.model_distribution = model_distribution
 
         # otherwise the model won't learn
         assert (learning_rate > 0)

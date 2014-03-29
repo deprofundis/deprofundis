@@ -98,7 +98,9 @@ class DynamicSGD(SGD):
              visible_k_probs, visible_k_states, visible_lagged):
              
             assert(visible_lagged.shape[1:] == (self.model_distribution.size_visible, self.model_distribution.m_lag_visible))
-            assert(len(hidden_0_probs) == len(visible_k_states)) 
+            assert(len(hidden_0_states) == len(visible_k_states)) # check minibatch size
+            assert(len(visible_0_states) == len(visible_k_states)) # check minibatch size
+            assert(len(visible_lagged) == len(visible_k_states)) # check minibatch size
                              
             # now for dynamic biases
             # calculate A

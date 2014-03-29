@@ -201,15 +201,16 @@ class DynamicBernoulli(Distribution):
         @param hidden: hidden input
         @param visible_lagged: lagged visible input (m input vectors)
         """
-        assert(hidden.shape == (self.size_hidden))
-        assert(visible_lagged.shape == (self.m_lag_visible, self.size_visible))
+        assert(hidden.shape[-1] == (self.size_hidden))
+        assert(visible_lagged.shape[1:] == (self.size_visible, self.m_lag_visible))
+        assert(len(visible_lagged) == len(hidden))
         
         # calculate fan in to visible units
         fan_in = self.bias_visible
         for lag in range(self.m_lag_visible):
-            fan_in += np.dot(visible_lagged[lag, :], self.vis_vis_weights[:,:,lag])
+            fan_in += np.dot(visible_lagged[:,:,lag], self.vis_vis_weights[:,:,lag])
 
-        fan_in += np.dot(self.weights, hidden)
+        fan_in += np.dot(self.weights, hidden.T)
 
         act = act_fn.sigmoid(fan_in)
         # returns a matrix of size (1xself.size_visible)
@@ -220,13 +221,14 @@ class DynamicBernoulli(Distribution):
         @param visible: visible input
         @param visible_lagged: lagged visible input(n input vectors)
         """
-        assert(visible.shape == (self.size_visible))
-        assert(visible_lagged.shape == (self.n_lag_hidden, self.size_visible))
+        assert(visible.shape[-1] == (self.size_visible))
+        assert(visible_lagged.shape[1:] == (self.size_visible, self.n_lag_hidden))
+        assert(len(visible_lagged) == len(visible))
         
         # calculate fan in to hidden units
         fan_in = self.bias_hidden
         for lag in range(self.n_lag_hidden):
-            fan_in += np.dot(visible_lagged[lag, :], self.vis_hid_weights[:,:,lag])
+            fan_in += np.dot(visible_lagged[:,:,lag], self.vis_hid_weights[:,:,lag])
         
         fan_in += np.dot(visible, self.weights)
         
@@ -239,14 +241,15 @@ class DynamicBernoulli(Distribution):
         @param hidden: hidden input
         @param visible_lagged: lagged visible input (m input vectors)
         """
-        assert(hidden.shape == (self.size_hidden))
-        assert(visible_lagged.shape == (self.m_lag_visible, self.size_visible))
+        assert(hidden.shape[-1] == (self.size_hidden))
+        assert(visible_lagged.shape[1:] == (self.size_visible, self.m_lag_visible))
+        assert(len(visible_lagged) == len(hidden))
         
         # compute conditional probabilities of visible units
         conditional_prob_v = self.conditional_prob_v(hidden, visible_lagged)
         # sample states
-        state_v = conditional_prob_v > np.random.uniform(0,1,size=(self.size_visible))
-        # returns a matrix (size of batch=1) x (size of visible layer) # TODO include minibatches
+        state_v = conditional_prob_v > np.random.uniform(0,1,size=(conditional_prob_v.shape))
+        # returns a matrix (size of batch) x (size of visible layer)
         return conditional_prob_v, state_v.astype(int)
         
     def state_h(self, visible, visible_lagged):
@@ -254,13 +257,14 @@ class DynamicBernoulli(Distribution):
         @param visible: visible input
         @param visible_lagged: lagged visible input(n input vectors)
         """
-        assert(visible.shape == (self.size_visible))
-        assert(visible_lagged.shape == (self.n_lag_hidden, self.size_visible))
+        assert(visible.shape[-1] == (self.size_visible))
+        assert(visible_lagged.shape[1:] == (self.size_visible, self.n_lag_hidden))
+        assert(len(visible_lagged) == len(visible))
         
         # compute conditional probabilities of hidden units
-        conditional_prob_h = self.conditional_prob_h(visible)
+        conditional_prob_h = self.conditional_prob_h(visible, visible_lagged)
         # sample states
-        state_h = conditional_prob_h > np.random.uniform(0,1,size=(self.size_hidden))
+        state_h = conditional_prob_h > np.random.uniform(0,1,size=(conditional_prob_h.shape))
         # returns a matrix (size of batch=1) x (size of hidden layer) # TODO include minibatches
         return conditional_prob_h, state_h.astype(int)
         

@@ -60,20 +60,3 @@ class RBM():
 
     def compute_likelihood(self):
         pass
-
-
-class CRBM(object):
-    """
-    Class represents a conditional restricted boltzmann machine.
-    """
-    def __init__(self, model_distribution, sampler, optimizer):
-        assert (isinstance(model_distribution, Distribution))
-        assert (isinstance(sampler, Sampler))
-        assert (isinstance(optimizer, DynamicSGD))
-
-        self.model_distribution = model_distribution
-        self.sampler = sampler
-        self.optimizer = optimizer
-
-    def train_batch(self):
-        pass

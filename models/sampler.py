@@ -41,7 +41,7 @@ class BlockGibbsSampler(Sampler):
                hidden_k_prob, hidden_k_state, \
                visible_k_prob, visible_k_state
                
-class DynamicGibbsSampler(Sampler):
+class DynamicBlockGibbsSampler(Sampler):
     """
     Implements a Dynamic Block Gibbs Sampler (DBGS)
     """

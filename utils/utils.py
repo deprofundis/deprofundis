@@ -20,27 +20,51 @@ def grab_minibatch(patterns, n_in_minibatch):
 def prepare_batches(len_data,len_batch):
     """
     Computes the start and stop indexes for a batch of data.
-    @param len_data: Lenght of the entire data set
+    
+    @param len_data: Length of the entire data set
     @param len_batch: Length of a single batch
     @return: An array that contains start and stop indexes
     """
     # compute number of batches
-    num_batch = np.floor(len_data / float(len_batch))
+    num_batch = len_data / len_batch
     # compute minimum index length
-    idx = np.arange(num_batch * len_batch)
+    idx_list = np.arange(num_batch * len_batch)
     # shape to batch sizes
-    idx = np.reshape(idx, (num_batch, len_batch))
-    idx = np.array([idx[:,0], idx[:,-1]])
-    idx = idx.T
+    idx_list = np.reshape(idx_list, (num_batch, len_batch))
+    idx_list = np.array([idx_list[:,0], idx_list[:,-1]])
+    idx_list = idx_list.T
     # take the first and the last column to have a start and a stop column
     mod = len_data % float(len_batch)
     if mod > 0:
-        low_index = idx[-1,0] + 1
+        low_index = idx_list[-1,0] + 1
         high_index = (len_data-1)
-        idx = np.vstack([idx, [low_index,high_index]])
+        idx_list = np.vstack([idx_list, [low_index, high_index]])
     # shuffle our indizes
-    np.random.shuffle(idx)
-    return idx
+    np.random.shuffle(idx_list)
+    return idx_list
+    
+def prepare_frames(len_data, len_chunk, len_batch):
+    """
+    Returns a list of batches where each batch contains a list of tuples defining 
+    start/end point of a chunk respectively
+    
+    Note: Each chunk represents a sliding window which is moved by 1 data point (frame) every time
+    
+    @param len_data: Length of the entire data set
+    @param len_chunk: Length of a single frame (eq. number of data points per frame)
+    @param len_batch: Length of a single batch
+    """
+    # isolate chunks of length N+1/len_frame    
+    start_idx_list = np.arange(len_data - len_chunk + 1)
+    stop_idx_list = np.arange(len_chunk, len_data + 1)
+    # create start/end idx tuples
+    idx_list = zip(start_idx_list, stop_idx_list) 
+    # shuffle chunks
+    np.random.shuffle(idx_list)
+    # create batches of size len_batch
+    batch_idx_list = [idx[i:i+len_batch] for i in xrange(0, len(idx), len_batch)]
+    
+    return batch_idx_list
 
 def imagesc(data, dest=None, grayscale=True, vmin=None, vmax=None):
     cmap = plt.cm.gray if grayscale else None

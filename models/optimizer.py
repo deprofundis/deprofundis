@@ -1,5 +1,5 @@
 from distribution import Distribution
-
+import ipdb
 import numpy as np
 
 class SGD(object):
@@ -89,7 +89,7 @@ class SGD(object):
         
 class DynamicSGD(SGD):
     def __init__(self, model_distribution, learning_rate=0.01, weight_decay=0.0002, momentum=0.9, is_ascent=True):
-        SGD.__init__(model_distribution, learning_rate, weight_decay, momentum, is_ascent)
+        SGD.__init__(self, model_distribution, learning_rate, weight_decay, momentum, is_ascent)
         
         self.d_vis_vis = np.zeros(shape=model_distribution.vis_vis_weights.shape) # past delta A
         self.d_vis_hid = np.zeros(shape=model_distribution.vis_hid_weights.shape) # past delta B
@@ -101,17 +101,19 @@ class DynamicSGD(SGD):
             assert(len(hidden_0_states) == len(visible_k_states)) # check minibatch size
             assert(len(visible_0_states) == len(visible_k_states)) # check minibatch size
             assert(len(visible_lagged) == len(visible_k_states)) # check minibatch size
+            
+            batch_size = len(hidden_0_states)
                              
             # now for dynamic biases
             # calculate A
             d_vis_vis = np.zeros(shape=self.d_vis_vis.shape)
             d_vis_hid = np.zeros(shape=self.d_vis_hid.shape)
             for lag in range(self.model_distribution.m_lag_visible):
-                d_vis_vis[:,:,lag] = np.dot(visible_0_states - visible_k_states, visible_lagged[:,:,lag])
+                d_vis_vis[:,:,lag] = 1./batch_size * np.dot((visible_0_states - visible_k_states).T, visible_lagged[:,:,lag])
             
             # calculate B
             for lag in range(self.model_distribution.n_lag_hidden):
-                d_vis_hid[:,:,lag] = np.dot(hidden_0_states.T, visible_lagged[:,:,lag]) # matrix of size (size_visible x size_hidden)
+                d_vis_hid[:,:,lag] = 1./batch_size * np.dot(visible_lagged[:,:,lag].T, hidden_0_states) # matrix of size (size_visible x size_hidden)
                 
             # update
             d_vis_vis = self.ascent_factor * self.learning_rate * d_vis_vis \
@@ -127,7 +129,7 @@ class DynamicSGD(SGD):
             self.d_vis_hid = np.copy(d_vis_hid)
             
             # W, a, b same as for RBM
-            d_weight_update, d_bias_hidden_update, d_bias_visible_update = super.optimize(visible_0_states, hidden_0_states, 
+            d_weight_update, d_bias_hidden_update, d_bias_visible_update = super(DynamicSGD, self).optimize(visible_0_states, hidden_0_states, 
                                                                                           hidden_0_probs, hidden_k_probs, hidden_k_states,
                                                                                           visible_k_probs, visible_k_states)
     

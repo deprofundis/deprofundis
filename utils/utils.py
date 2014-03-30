@@ -16,7 +16,6 @@ def grab_minibatch(patterns, n_in_minibatch):
     ix = ix[:n_in_minibatch]
     return patterns[ix,:]
 
-
 def prepare_batches(len_data,len_batch):
     """
     Computes the start and stop indexes for a batch of data.
@@ -62,7 +61,7 @@ def prepare_frames(len_data, len_chunk, len_batch):
     # shuffle chunks
     np.random.shuffle(idx_list)
     # create batches of size len_batch
-    batch_idx_list = [idx[i:i+len_batch] for i in xrange(0, len(idx), len_batch)]
+    batch_idx_list = [idx_list[i:i+len_batch] for i in xrange(0, len(idx_list), len_batch)]
     
     return batch_idx_list
 

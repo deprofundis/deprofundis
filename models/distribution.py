@@ -208,9 +208,9 @@ class DynamicBernoulli(Distribution):
         # calculate fan in to visible units
         fan_in = self.bias_visible
         for lag in range(self.m_lag_visible):
-            fan_in += np.dot(visible_lagged[:,:,lag], self.vis_vis_weights[:,:,lag])
+            fan_in = fan_in + np.dot(visible_lagged[:,:,lag], self.vis_vis_weights[:,:,lag])
 
-        fan_in += np.dot(self.weights, hidden.T)
+        fan_in = fan_in + np.dot(hidden, self.weights.T)
 
         act = act_fn.sigmoid(fan_in)
         # returns a matrix of size (1xself.size_visible)
@@ -228,9 +228,9 @@ class DynamicBernoulli(Distribution):
         # calculate fan in to hidden units
         fan_in = self.bias_hidden
         for lag in range(self.n_lag_hidden):
-            fan_in += np.dot(visible_lagged[:,:,lag], self.vis_hid_weights[:,:,lag])
+            fan_in = fan_in + np.dot(visible_lagged[:,:,lag], self.vis_hid_weights[:,:,lag])
         
-        fan_in += np.dot(visible, self.weights)
+        fan_in = fan_in + np.dot(visible, self.weights)
         
         act = act_fn.sigmoid(fan_in)
         # returns a matrix of size (1xself.size_hidden)

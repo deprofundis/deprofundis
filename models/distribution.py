@@ -1,6 +1,7 @@
 from utils import activation as act_fn
 import numpy as np
 
+
 class Distribution(object):
     """
     Interface for a basic probability distribution used in Energy based models.
